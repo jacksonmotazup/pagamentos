@@ -4,9 +4,9 @@ import br.com.zup.pagamentos.formapagamento.FormaPagamento;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Usuario {
@@ -20,7 +20,8 @@ public class Usuario {
 
     @Column(nullable = false)
     @ElementCollection
-    private final List<FormaPagamento> formasPagamento = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    private final Set<FormaPagamento> formasPagamento = new HashSet<>();
 
     /**
      * @deprecated hibernate
@@ -42,7 +43,7 @@ public class Usuario {
         return email;
     }
 
-    public List<FormaPagamento> getFormasPagamento() {
+    public Set<FormaPagamento> getFormasPagamento() {
         return formasPagamento;
     }
 }

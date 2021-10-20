@@ -25,16 +25,16 @@ public class PagamentosApplication implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        var usuario1 = new Usuario("usuario1@email.com", CARTAO_MASTER);
+        var usuario1 = new Usuario("usuario1@email.com", CARTAO_CREDITO);
         em.persist(usuario1);
-        var usuario2 = new Usuario("usuario2@email.com", CARTAO_MASTER, CARTAO_VISA);
+        var usuario2 = new Usuario("usuario2@email.com", CARTAO_CREDITO, MAQUINA);
         em.persist(usuario2);
         var usuario3 = new Usuario("usuario3@gmail.com", DINHEIRO, CHEQUE);
         em.persist(usuario3);
 
-        var restaurante1 = new Restaurante("Restaurante 1", CARTAO_MASTER, CARTAO_VISA);
+        var restaurante1 = new Restaurante("Restaurante 1", CARTAO_CREDITO);
         em.persist(restaurante1);
-        var restaurante2 = new Restaurante("Restaurante 2", CARTAO_MASTER, CARTAO_VISA, MAQUINA, DINHEIRO, CHEQUE);
+        var restaurante2 = new Restaurante("Restaurante 2", CARTAO_CREDITO, MAQUINA, DINHEIRO, CHEQUE);
         em.persist(restaurante2);
 
     }

@@ -2,11 +2,10 @@ package br.com.zup.pagamentos.formapagamento;
 
 public enum FormaPagamento {
 
-    CARTAO_MASTER(true, "Cartão MasterCard"),
-    CARTAO_VISA(true, "Cartão Visa"),
-    DINHEIRO(false, "Dinheiro presencialmente"),
-    MAQUINA(false, "Maquina de cartão presencialmente"),
-    CHEQUE(false, "Cheque presencialmente");
+    CARTAO_CREDITO(true, "Cartão"),
+    DINHEIRO(false, "Dinheiro"),
+    MAQUINA(false, "Maquina de cartão"),
+    CHEQUE(false, "Cheque");
 
     private final boolean online;
     private final String descricao;
