@@ -1,0 +1,41 @@
+package br.com.zup.pagamentos;
+
+import br.com.zup.pagamentos.restaurante.Restaurante;
+import br.com.zup.pagamentos.usuario.Usuario;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+
+import static br.com.zup.pagamentos.formapagamento.FormaPagamento.*;
+
+@SpringBootApplication
+public class PagamentosApplication implements CommandLineRunner {
+
+    public static void main(String[] args) {
+        SpringApplication.run(PagamentosApplication.class, args);
+    }
+
+    @PersistenceContext
+    private EntityManager em;
+
+    @Override
+    @Transactional
+    public void run(String... args) throws Exception {
+        var usuario1 = new Usuario("usuario1@email.com", CARTAO_MASTER);
+        em.persist(usuario1);
+        var usuario2 = new Usuario("usuario2@email.com", CARTAO_MASTER, CARTAO_VISA);
+        em.persist(usuario2);
+        var usuario3 = new Usuario("usuario3@gmail.com", DINHEIRO, CHEQUE);
+        em.persist(usuario3);
+
+        var restaurante1 = new Restaurante("Restaurante 1", CARTAO_MASTER, CARTAO_VISA);
+        em.persist(restaurante1);
+        var restaurante2 = new Restaurante("Restaurante 2", CARTAO_MASTER, CARTAO_VISA, MAQUINA, DINHEIRO, CHEQUE);
+        em.persist(restaurante2);
+
+    }
+}
