@@ -50,6 +50,6 @@ public class Usuario {
     }
 
     public List<FormaPagamento> formasAceitas(Restaurante restaurante) {
-        return formasPagamento.stream().filter(restaurante.getFormasPagamentoAceitas()::contains).toList();
+        return formasPagamento.stream().filter(restaurante::aceitaFormaPagamento).toList();
     }
 }

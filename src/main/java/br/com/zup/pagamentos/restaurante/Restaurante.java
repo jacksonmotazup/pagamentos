@@ -45,4 +45,8 @@ public class Restaurante {
     public Set<FormaPagamento> getFormasPagamentoAceitas() {
         return formasPagamentoAceitas;
     }
+
+    public boolean aceitaFormaPagamento(FormaPagamento formaPagamento) {
+        return this.formasPagamentoAceitas.contains(formaPagamento);
+    }
 }
