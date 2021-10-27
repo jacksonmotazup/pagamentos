@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RestControllerAdvice
 public class ExceptionsHandler {
@@ -43,9 +44,9 @@ public class ExceptionsHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(BAD_REQUEST)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
     public String exceptionHandler(Exception ex) {
-        return ex.getMessage();
+        return "Erro inesperado";
     }
 
 
