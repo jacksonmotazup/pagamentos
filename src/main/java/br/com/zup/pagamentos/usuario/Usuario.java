@@ -1,11 +1,13 @@
 package br.com.zup.pagamentos.usuario;
 
 import br.com.zup.pagamentos.formapagamento.FormaPagamento;
+import br.com.zup.pagamentos.restaurante.Restaurante;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -45,5 +47,9 @@ public class Usuario {
 
     public Set<FormaPagamento> getFormasPagamento() {
         return formasPagamento;
+    }
+
+    public List<FormaPagamento> formasAceitas(Restaurante restaurante) {
+        return formasPagamento.stream().filter(restaurante::aceitaFormaPagamento).toList();
     }
 }
