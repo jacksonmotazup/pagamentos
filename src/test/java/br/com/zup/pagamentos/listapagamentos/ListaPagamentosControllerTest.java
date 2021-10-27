@@ -1,5 +1,6 @@
 package br.com.zup.pagamentos.listapagamentos;
 
+import br.com.zup.pagamentos.compartilhado.handler.ExceptionHandlerResponse;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.usuario.Usuario;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import javax.transaction.Transactional;
 
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -109,10 +111,13 @@ class ListaPagamentosControllerTest {
                             .contentType(APPLICATION_JSON)
                             .content(toJson(request)))
                     .andExpect(status().isNotFound())
-                    .andReturn().getResponse().getContentAsString();
+                    .andReturn().getResponse().getContentAsString(UTF_8);
+
+            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
 
             assertAll(
-                    () -> assertEquals("Usuário não encontrado", response)
+                    () -> assertTrue(resposta.erros().get("mensagem").contains("Usuário não encontrado")),
+                    () -> assertEquals(1, resposta.erros().get("mensagem").size())
             );
         }
 
@@ -125,10 +130,13 @@ class ListaPagamentosControllerTest {
                             .contentType(APPLICATION_JSON)
                             .content(toJson(request)))
                     .andExpect(status().isNotFound())
-                    .andReturn().getResponse().getContentAsString();
+                    .andReturn().getResponse().getContentAsString(UTF_8);
+
+            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
 
             assertAll(
-                    () -> assertEquals("Restaurante não encontrado", response)
+                    () -> assertTrue(resposta.erros().get("mensagem").contains("Restaurante não encontrado")),
+                    () -> assertEquals(1, resposta.erros().get("mensagem").size())
             );
         }
     }
