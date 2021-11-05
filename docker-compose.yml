@@ -6,8 +6,8 @@ services:
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
-      POSTGRES_DATABASE: pagamentos
+      POSTGRES_DB: pagamentos
     ports:
       - "5432:5432"
-    volumes:
-      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+#    volumes:
+#      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
