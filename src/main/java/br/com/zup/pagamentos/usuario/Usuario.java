@@ -2,6 +2,7 @@ package br.com.zup.pagamentos.usuario;
 
 import br.com.zup.pagamentos.formapagamento.FormaPagamento;
 import br.com.zup.pagamentos.listapagamentos.RegraFraude;
+import br.com.zup.pagamentos.listapagamentos.RegraFraudeEmail;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 
 import javax.persistence.*;
@@ -24,7 +25,7 @@ public class Usuario {
     @Column(nullable = false)
     @ElementCollection
     @Enumerated(EnumType.STRING)
-    private final Set<FormaPagamento> formasPagamento = new HashSet<>();
+    private Set<FormaPagamento> formasPagamento = new HashSet<>();
 
     /**
      * @deprecated hibernate
@@ -55,5 +56,9 @@ public class Usuario {
                 .filter(restaurante::aceitaFormaPagamento)
                 .filter(forma -> regraFraude.aceita(this, forma))
                 .toList();
+    }
+
+    public boolean podePagar(Restaurante restaurante, FormaPagamento formaPagamento, RegraFraudeEmail regraFraudeEmail) {
+        return this.formasAceitas(restaurante, regraFraudeEmail).contains(formaPagamento);
     }
 }
