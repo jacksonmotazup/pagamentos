@@ -1,6 +1,7 @@
 package br.com.zup.pagamentos.usuario;
 
 import br.com.zup.pagamentos.formapagamento.FormaPagamento;
+import br.com.zup.pagamentos.listapagamentos.RegraFraude;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 
 import javax.persistence.*;
@@ -49,7 +50,10 @@ public class Usuario {
         return formasPagamento;
     }
 
-    public List<FormaPagamento> formasAceitas(Restaurante restaurante) {
-        return formasPagamento.stream().filter(restaurante::aceitaFormaPagamento).toList();
+    public List<FormaPagamento> formasAceitas(Restaurante restaurante, RegraFraude regraFraude) {
+        return formasPagamento.stream()
+                .filter(restaurante::aceitaFormaPagamento)
+                .filter(forma -> regraFraude.aceita(this, forma))
+                .toList();
     }
 }
