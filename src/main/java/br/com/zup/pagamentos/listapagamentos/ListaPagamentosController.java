@@ -19,11 +19,15 @@ public class ListaPagamentosController {
 
     private final RestauranteRepository restauranteRepository;
     private final UsuarioRepository usuarioRepository;
+    private final RegraFraude regraFraude;
 
     @Autowired
-    public ListaPagamentosController(RestauranteRepository restauranteRepository, UsuarioRepository usuarioRepository) {
+    public ListaPagamentosController(RestauranteRepository restauranteRepository,
+                                     UsuarioRepository usuarioRepository,
+                                     RegraFraude regraFraude) {
         this.restauranteRepository = restauranteRepository;
         this.usuarioRepository = usuarioRepository;
+        this.regraFraude = regraFraude;
     }
 
 
@@ -35,7 +39,7 @@ public class ListaPagamentosController {
         var usuario = usuarioRepository.findById(request.usuarioId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
 
-        var formasPagamentosComum = usuario.formasAceitas(restaurante);
+        var formasPagamentosComum = usuario.formasAceitas(restaurante, regraFraude);
 
         return new PagamentosResponse(formasPagamentosComum);
     }

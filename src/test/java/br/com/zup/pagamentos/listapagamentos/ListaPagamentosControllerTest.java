@@ -1,6 +1,7 @@
 package br.com.zup.pagamentos.listapagamentos;
 
 import br.com.zup.pagamentos.compartilhado.handler.ExceptionHandlerResponse;
+import br.com.zup.pagamentos.formapagamento.FormaPagamento;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.usuario.Usuario;
@@ -28,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@Transactional
+@Transactional
 @ActiveProfiles("test")
 class ListaPagamentosControllerTest {
 
@@ -41,6 +42,7 @@ class ListaPagamentosControllerTest {
     private RestauranteRepository restauranteRepository;
 
     private Usuario usuario;
+    private Usuario usuario2;
     private Restaurante restaurante;
     private Restaurante restaurante2;
 
@@ -51,6 +53,7 @@ class ListaPagamentosControllerTest {
     @BeforeEach
     void setUp() {
         usuario = usuarioRepository.save(new Usuario("email@a.com", CARTAO_CREDITO, DINHEIRO, MAQUINA));
+        usuario2 = usuarioRepository.save(new Usuario("jemail@a.com", CARTAO_CREDITO, DINHEIRO, CHEQUE));
         restaurante = restauranteRepository.save(new Restaurante("Restaurante", CARTAO_CREDITO, CHEQUE, DINHEIRO));
         restaurante2 = restauranteRepository.save(new Restaurante("Restaurante2", CHEQUE));
     }
@@ -60,14 +63,14 @@ class ListaPagamentosControllerTest {
 
         @Test
         @DisplayName("Deve retornar lista de formas de pagamento aceitas por usuario e pelo restaurante, retornar 200")
-        void deveRetornarListaFormasPagamentoEmComumUsuarioERestaurante() throws Exception {
+        void teste1() throws Exception {
             var request = new ListaPagamentosRequest(usuario.getId(), restaurante.getId());
 
             var response = mockMvc.perform(get(URI_PAGAMENTOS)
                             .contentType(APPLICATION_JSON)
                             .content(toJson(request)))
                     .andExpect(status().isOk())
-                    .andReturn().getResponse().getContentAsString();
+                    .andReturn().getResponse().getContentAsString(UTF_8);
 
             var resposta = (PagamentosResponse) fromJson(response, PagamentosResponse.class);
 
@@ -82,14 +85,14 @@ class ListaPagamentosControllerTest {
 
         @Test
         @DisplayName("Deve retornar lista vazia quando não houverem formas de pagamento em comum, retornar 200")
-        void deveRetornarListaVaziaQuandoNaoHouverFormaEmComum() throws Exception {
+        void teste2() throws Exception {
             var request = new ListaPagamentosRequest(usuario.getId(), restaurante2.getId());
 
             var response = mockMvc.perform(get(URI_PAGAMENTOS)
                             .contentType(APPLICATION_JSON)
                             .content(toJson(request)))
                     .andExpect(status().isOk())
-                    .andReturn().getResponse().getContentAsString();
+                    .andReturn().getResponse().getContentAsString(UTF_8);
 
             var resposta = (PagamentosResponse) fromJson(response, PagamentosResponse.class);
 
@@ -104,7 +107,7 @@ class ListaPagamentosControllerTest {
 
         @Test
         @DisplayName("Não deve retornar lista de formas de pagamento quando usuário não existir, retornar 404")
-        void naoDeveRetornarListaDeFormasDePagamentoQuandoUsuarioNaoExistir() throws Exception {
+        void teste3() throws Exception {
             var request = new ListaPagamentosRequest(Long.MAX_VALUE, restaurante.getId());
 
             var response = mockMvc.perform(get(URI_PAGAMENTOS)
@@ -123,7 +126,7 @@ class ListaPagamentosControllerTest {
 
         @Test
         @DisplayName("Não deve retornar lista de formas de pagamento quando restaurante não existir, retornar 404")
-        void naoDeveRetornarListaDeFormasDePagamentoQuandoRestauranteNaoExistir() throws Exception {
+        void teste4() throws Exception {
             var request = new ListaPagamentosRequest(usuario.getId(), Long.MAX_VALUE);
 
             var response = mockMvc.perform(get(URI_PAGAMENTOS)
@@ -137,6 +140,28 @@ class ListaPagamentosControllerTest {
             assertAll(
                     () -> assertTrue(resposta.erros().get("mensagem").contains("Restaurante não encontrado")),
                     () -> assertEquals(1, resposta.erros().get("mensagem").size())
+            );
+        }
+
+        @Test
+        @DisplayName("Deve retornar apenas formas de pagamento OFFLINE quando o email começar com J (regra ficticia de fraude")
+        void teste5() throws Exception {
+
+            var request = new ListaPagamentosRequest(usuario2.getId(), restaurante.getId());
+
+            var response = mockMvc.perform(get(URI_PAGAMENTOS)
+                            .contentType(APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString(UTF_8);
+
+            var resposta = (PagamentosResponse) fromJson(response, PagamentosResponse.class);
+
+            assertAll(
+                    () -> assertEquals(2, resposta.formasPagamento().size()),
+                    () -> assertTrue(resposta.formasPagamento().contains(CHEQUE)),
+                    () -> assertTrue(resposta.formasPagamento().contains(DINHEIRO)),
+                    () -> assertFalse(resposta.formasPagamento().contains(CARTAO_CREDITO))
             );
         }
     }
