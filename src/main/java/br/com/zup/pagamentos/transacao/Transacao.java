@@ -5,6 +5,7 @@ import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.usuario.Usuario;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -19,21 +20,21 @@ public class Transacao {
     @Column(nullable = false, unique = true)
     private Long pedidoId;
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @NotNull
     private Usuario usuario;
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @NotNull
     private Restaurante restaurante;
-    @Column(nullable = false)
+    @NotNull
     private BigDecimal valor;
-    @Column(nullable = false)
+    @NotNull
     private LocalDateTime dataCriacao = LocalDateTime.now();
-    @Column(nullable = false)
+    @NotNull
     @Enumerated(STRING)
     private FormaPagamento formaPagamento;
     private String informacoes;
     @Enumerated(STRING)
-    @Column(nullable = false)
+    @NotNull
     private StatusTransacao status;
 
     @Deprecated
