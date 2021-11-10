@@ -50,18 +50,18 @@ class PagamentoOfflineControllerTest {
 
     @BeforeEach
     void setUp() {
+        transacaoRepository.deleteAll();
         usuarioRepository.deleteAll();
         restauranteRepository.deleteAll();
-        transacaoRepository.deleteAll();
         usuario = usuarioRepository.save(new Usuario("email@a.com", CARTAO_CREDITO, DINHEIRO, MAQUINA));
         restaurante = restauranteRepository.save(new Restaurante("Restaurante", CARTAO_CREDITO, CHEQUE, DINHEIRO));
     }
 
     @AfterEach
     void tearDown() {
+        transacaoRepository.deleteAll();
         usuarioRepository.deleteAll();
         restauranteRepository.deleteAll();
-        transacaoRepository.deleteAll();
     }
 
     @Nested
