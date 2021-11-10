@@ -1,7 +1,5 @@
 package br.com.zup.pagamentos.pagamento.offline;
 
-import br.com.zup.pagamentos.listapagamentos.RegraFraudeEmail;
-import br.com.zup.pagamentos.pagamento.PedidoMock;
 import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.transacao.TransacaoRepository;
 import br.com.zup.pagamentos.usuario.UsuarioRepository;
@@ -15,7 +13,6 @@ import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Validated
 @RestController
@@ -47,21 +44,7 @@ public class PagamentoOfflineController {
             throw new ResponseStatusException(BAD_REQUEST, "Transação já existe");
         }
 
-        var restaurante = restauranteRepository.findById(request.idRestaurante())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Restaurante não encontrado"));
-
-        var usuario = usuarioRepository.findById(request.idUsuario())
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
-
-        boolean podePagar = usuario.podePagar(restaurante, request.formaPagamento(), new RegraFraudeEmail());
-
-        if (!podePagar) {
-            throw new ResponseStatusException(BAD_REQUEST, "A combinação dessa forma de pagamento entre usuário e restaurante não é válida");
-        }
-
-        var pedido = PedidoMock.paraPedido(idPedido);
-
-        var transacao = request.toTransacao(pedido, usuario, restaurante);
+        var transacao = request.toTransacao(idPedido, usuarioRepository, restauranteRepository);
 
         transacaoRepository.save(transacao);
 
