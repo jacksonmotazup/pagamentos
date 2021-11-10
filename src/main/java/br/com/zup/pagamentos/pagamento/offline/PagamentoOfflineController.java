@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -33,8 +32,8 @@ public class PagamentoOfflineController {
     }
 
     @PostMapping("/{idPedido}")
-    public String paga(@RequestBody @Valid NovoPagamentoOfflineRequest request,
-                       @PathVariable @NotNull Long idPedido) {
+    public Long paga(@RequestBody @Valid NovoPagamentoOfflineRequest request,
+                     @PathVariable @NotNull Long idPedido) {
 
         if (request.formaPagamento().isOnline()) {
             throw new ResponseStatusException(BAD_REQUEST, "Esse endpoint suporta apenas pagamentos Offline");
@@ -48,7 +47,7 @@ public class PagamentoOfflineController {
 
         transacaoRepository.save(transacao);
 
-        return UUID.randomUUID().toString();
+        return transacao.getId();
 
     }
 }

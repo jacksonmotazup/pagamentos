@@ -1,7 +1,6 @@
 package br.com.zup.pagamentos.listapagamentos;
 
 import br.com.zup.pagamentos.compartilhado.handler.ExceptionHandlerResponse;
-import br.com.zup.pagamentos.formapagamento.FormaPagamento;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.usuario.Usuario;
