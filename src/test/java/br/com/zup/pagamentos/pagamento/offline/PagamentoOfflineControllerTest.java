@@ -16,14 +16,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
 
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.*;
 import static br.com.zup.pagamentos.transacao.StatusTransacao.AGUARDANDO_CONFIRMACAO;
+import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,8 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class PagamentoOfflineControllerTest {
 
-    private final Long ID_PEDIDO = 123L;
-    private final String URI_PAGAMENTO_OFFLINE = "/api/v1/pagamento/offline/" + ID_PEDIDO;
+    private final BigDecimal VALOR = BigDecimal.valueOf(10);
+    private final Long PEDIDO_ID = 123L;
+    private final String URI_PAGAMENTO_OFFLINE = "/api/v1/pagamento/offline/" + PEDIDO_ID;
+    private final String URI_PAGAMENTO_OFFLINE_CONCLUIR = "/api/v1/pagamento/offline/" + PEDIDO_ID + "/concluir";
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -65,7 +68,7 @@ class PagamentoOfflineControllerTest {
     }
 
     @Nested
-    class testes {
+    class TestesIniciarTransacao {
 
         @Test
         @DisplayName("Deve criar uma transação para um pagamento OFFLINE, retornar 200 e o Id da transação")
@@ -82,7 +85,8 @@ class PagamentoOfflineControllerTest {
 
             assertAll(
                     () -> assertEquals(1, transacoes.size()),
-                    () -> assertEquals(transacoes.get(0).getId(), Long.valueOf(response))
+                    () -> assertEquals(transacoes.get(0).getId(), Long.valueOf(response)),
+                    () -> assertEquals(AGUARDANDO_CONFIRMACAO, transacoes.get(0).getStatus())
             );
         }
 
@@ -158,7 +162,7 @@ class PagamentoOfflineControllerTest {
         void teste5() throws Exception {
             var request = new NovoPagamentoOfflineRequest(DINHEIRO, restaurante.getId(), usuario.getId());
 
-            var transacao = new Transacao(ID_PEDIDO, usuario, restaurante, BigDecimal.valueOf(10), DINHEIRO,
+            var transacao = new Transacao(PEDIDO_ID, usuario, restaurante, VALOR, DINHEIRO,
                     null, AGUARDANDO_CONFIRMACAO);
             transacaoRepository.save(transacao);
 
@@ -203,6 +207,96 @@ class PagamentoOfflineControllerTest {
             );
         }
 
+
+    }
+
+    @Nested
+    class TestesConcluirTransacao {
+
+        @Test
+        @DisplayName("Deve concluir uma transação para um pagamento OFFLINE quando ela existir e estitver com status " +
+                "AGUARDANDO_CONFIRMACAO, retornar 200")
+        void teste1() throws Exception {
+            var transacao = new Transacao(PEDIDO_ID, usuario, restaurante, VALOR, DINHEIRO,
+                    null, AGUARDANDO_CONFIRMACAO);
+            transacaoRepository.save(transacao);
+
+            var response = mockMvc.perform(patch(URI_PAGAMENTO_OFFLINE_CONCLUIR))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString(UTF_8);
+
+            var transacoes = transacaoRepository.findAll();
+
+            assertAll(
+                    () -> assertEquals("Transação concluída", response),
+                    () -> assertEquals(1, transacoes.size()),
+                    () -> assertEquals(CONCLUIDA, transacoes.get(0).getStatus())
+            );
+        }
+
+        @Test
+        @DisplayName("Não deve concluir uma transação para um pagamento ONLINE, retornar 400")
+        void teste2() throws Exception {
+            var transacao = new Transacao(PEDIDO_ID, usuario, restaurante, VALOR, CARTAO_CREDITO,
+                    null, AGUARDANDO_CONFIRMACAO);
+            transacaoRepository.save(transacao);
+
+            var response = mockMvc.perform(patch(URI_PAGAMENTO_OFFLINE_CONCLUIR))
+                    .andExpect(status().isBadRequest())
+                    .andReturn().getResponse().getContentAsString(UTF_8);
+
+            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
+
+            var transacoes = transacaoRepository.findAll();
+
+            assertAll(
+                    () -> assertTrue(resposta.erros().get("mensagem").contains("Esse endpoint suporta apenas pagamentos Offline")),
+                    () -> assertEquals(1, resposta.erros().get("mensagem").size()),
+                    () -> assertEquals(1, transacoes.size()),
+                    () -> assertEquals(AGUARDANDO_CONFIRMACAO, transacoes.get(0).getStatus())
+            );
+        }
+
+        @Test
+        @DisplayName("Não deve concluir uma transação para um pagamento OFFLINE quando a transação não existir pelo pedidoId, retornar 404")
+        void teste3() throws Exception {
+
+            var response = mockMvc.perform(patch(URI_PAGAMENTO_OFFLINE_CONCLUIR))
+                    .andExpect(status().isNotFound())
+                    .andReturn().getResponse().getContentAsString(UTF_8);
+
+            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
+
+            var transacoes = transacaoRepository.findAll();
+
+            assertAll(
+                    () -> assertTrue(resposta.erros().get("mensagem").contains("Transação não encontrada")),
+                    () -> assertEquals(1, resposta.erros().get("mensagem").size()),
+                    () -> assertTrue(transacoes.isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Não deve concluir uma transação para um pagamento OFFLINE quando a transação não existir pelo status, retornar 404")
+        void teste4() throws Exception {
+            var transacao = new Transacao(PEDIDO_ID, usuario, restaurante, VALOR, DINHEIRO,
+                    null, CONCLUIDA);
+            transacaoRepository.save(transacao);
+
+            var response = mockMvc.perform(patch(URI_PAGAMENTO_OFFLINE_CONCLUIR))
+                    .andExpect(status().isNotFound())
+                    .andReturn().getResponse().getContentAsString(UTF_8);
+
+            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
+
+            var transacoes = transacaoRepository.findAll();
+
+            assertAll(
+                    () -> assertTrue(resposta.erros().get("mensagem").contains("Transação não encontrada")),
+                    () -> assertEquals(1, resposta.erros().get("mensagem").size()),
+                    () -> assertEquals(1, transacoes.size())
+            );
+        }
 
     }
 
