@@ -17,7 +17,7 @@ public class Transacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
+    @NotNull
     private Long pedidoId;
     @ManyToOne
     @NotNull
