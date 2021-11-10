@@ -24,7 +24,7 @@ public class Usuario {
     @Column(nullable = false)
     @ElementCollection
     @Enumerated(EnumType.STRING)
-    private final Set<FormaPagamento> formasPagamento = new HashSet<>();
+    private Set<FormaPagamento> formasPagamento = new HashSet<>();
 
     /**
      * @deprecated hibernate
@@ -55,5 +55,9 @@ public class Usuario {
                 .filter(restaurante::aceitaFormaPagamento)
                 .filter(forma -> regraFraude.aceita(this, forma))
                 .toList();
+    }
+
+    public boolean podePagar(Restaurante restaurante, FormaPagamento formaPagamento, RegraFraude regraFraude) {
+        return this.formasAceitas(restaurante, regraFraude).contains(formaPagamento);
     }
 }
