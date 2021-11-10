@@ -16,8 +16,8 @@ public class Transacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    private Long idPedido;
+    @Column(nullable = false, unique = true)
+    private Long pedidoId;
     @ManyToOne
     @JoinColumn(nullable = false)
     private Usuario usuario;
@@ -40,10 +40,10 @@ public class Transacao {
     public Transacao() {
     }
 
-    public Transacao(Long idPedido, Usuario usuario, Restaurante restaurante, BigDecimal valor,
+    public Transacao(Long pedidoId, Usuario usuario, Restaurante restaurante, BigDecimal valor,
                      FormaPagamento formaPagamento, String informacoes,
                      StatusTransacao status) {
-        this.idPedido = idPedido;
+        this.pedidoId = pedidoId;
         this.usuario = usuario;
         this.restaurante = restaurante;
         this.valor = valor;
@@ -56,8 +56,8 @@ public class Transacao {
         return id;
     }
 
-    public Long getIdPedido() {
-        return idPedido;
+    public Long getPedidoId() {
+        return pedidoId;
     }
 
     public Usuario getUsuario() {

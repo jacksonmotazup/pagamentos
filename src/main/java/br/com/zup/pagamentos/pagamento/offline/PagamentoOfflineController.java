@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -32,10 +33,11 @@ public class PagamentoOfflineController {
     }
 
     @PostMapping("/{idPedido}")
+    @Transactional
     public Long paga(@RequestBody @Valid NovoPagamentoOfflineRequest request,
                      @PathVariable @NotNull Long idPedido) {
 
-        if (request.formaPagamento().isOnline()) {
+        if (request.isPagamentoOnline()) {
             throw new ResponseStatusException(BAD_REQUEST, "Esse endpoint suporta apenas pagamentos Offline");
         }
 
@@ -48,6 +50,5 @@ public class PagamentoOfflineController {
         transacaoRepository.save(transacao);
 
         return transacao.getId();
-
     }
 }

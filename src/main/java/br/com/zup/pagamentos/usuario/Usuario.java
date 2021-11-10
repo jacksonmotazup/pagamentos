@@ -2,7 +2,6 @@ package br.com.zup.pagamentos.usuario;
 
 import br.com.zup.pagamentos.formapagamento.FormaPagamento;
 import br.com.zup.pagamentos.listapagamentos.RegraFraude;
-import br.com.zup.pagamentos.listapagamentos.RegraFraudeEmail;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 
 import javax.persistence.*;
@@ -58,7 +57,7 @@ public class Usuario {
                 .toList();
     }
 
-    public boolean podePagar(Restaurante restaurante, FormaPagamento formaPagamento, RegraFraudeEmail regraFraudeEmail) {
-        return this.formasAceitas(restaurante, regraFraudeEmail).contains(formaPagamento);
+    public boolean podePagar(Restaurante restaurante, FormaPagamento formaPagamento, RegraFraude regraFraude) {
+        return this.formasAceitas(restaurante, regraFraude).contains(formaPagamento);
     }
 }

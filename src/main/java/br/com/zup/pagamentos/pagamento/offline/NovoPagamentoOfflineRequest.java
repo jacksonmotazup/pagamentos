@@ -36,4 +36,8 @@ public record NovoPagamentoOfflineRequest(@NotNull FormaPagamento formaPagamento
         return new Transacao(pedido.idPedido(), usuario, restaurante, pedido.valor(), this.formaPagamento,
                 null, AGUARDANDO_CONFIRMACAO);
     }
+
+    public boolean isPagamentoOnline() {
+        return this.formaPagamento.isOnline();
+    }
 }

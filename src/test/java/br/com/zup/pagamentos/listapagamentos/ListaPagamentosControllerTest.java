@@ -7,10 +7,7 @@ import br.com.zup.pagamentos.usuario.Usuario;
 import br.com.zup.pagamentos.usuario.UsuarioRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 @ActiveProfiles("test")
 class ListaPagamentosControllerTest {
 
@@ -51,10 +47,18 @@ class ListaPagamentosControllerTest {
 
     @BeforeEach
     void setUp() {
+        usuarioRepository.deleteAll();
+        restauranteRepository.deleteAll();
         usuario = usuarioRepository.save(new Usuario("email@a.com", CARTAO_CREDITO, DINHEIRO, MAQUINA));
         usuario2 = usuarioRepository.save(new Usuario("jemail@a.com", CARTAO_CREDITO, DINHEIRO, CHEQUE));
         restaurante = restauranteRepository.save(new Restaurante("Restaurante", CARTAO_CREDITO, CHEQUE, DINHEIRO));
         restaurante2 = restauranteRepository.save(new Restaurante("Restaurante2", CHEQUE));
+    }
+
+    @AfterEach
+    void tearDown() {
+        usuarioRepository.deleteAll();
+        restauranteRepository.deleteAll();
     }
 
     @Nested
