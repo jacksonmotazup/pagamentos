@@ -41,7 +41,7 @@ public class PagamentoOfflineController {
             throw new ResponseStatusException(BAD_REQUEST, "Esse endpoint suporta apenas pagamentos Offline");
         }
 
-        if (transacaoRepository.existsByIdPedido(idPedido)) {
+        if (transacaoRepository.existsByPedidoId(idPedido)) {
             throw new ResponseStatusException(BAD_REQUEST, "Transação já existe");
         }
 
