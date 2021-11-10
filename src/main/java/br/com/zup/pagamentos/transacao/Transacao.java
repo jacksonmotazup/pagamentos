@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
 import static javax.persistence.EnumType.STRING;
 
 @Entity
@@ -57,10 +58,6 @@ public class Transacao {
         return id;
     }
 
-    public Long getPedidoId() {
-        return pedidoId;
-    }
-
     public Usuario getUsuario() {
         return usuario;
     }
@@ -69,23 +66,19 @@ public class Transacao {
         return restaurante;
     }
 
-    public BigDecimal getValor() {
-        return valor;
-    }
-
-    public LocalDateTime getDataCriacao() {
-        return dataCriacao;
-    }
-
     public FormaPagamento getFormaPagamento() {
         return formaPagamento;
+    }
+
+    public StatusTransacao getStatus() {
+        return status;
     }
 
     public String getInformacoes() {
         return informacoes;
     }
 
-    public StatusTransacao getStatus() {
-        return status;
+    public void conclui() {
+        this.status = CONCLUIDA;
     }
 }

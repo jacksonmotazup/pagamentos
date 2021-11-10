@@ -12,7 +12,9 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import static br.com.zup.pagamentos.transacao.StatusTransacao.AGUARDANDO_CONFIRMACAO;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Validated
 @RestController
@@ -32,23 +34,38 @@ public class PagamentoOfflineController {
         this.transacaoRepository = transacaoRepository;
     }
 
-    @PostMapping("/{idPedido}")
+    @PostMapping("/{pedidoId}")
     @Transactional
     public Long paga(@RequestBody @Valid NovoPagamentoOfflineRequest request,
-                     @PathVariable @NotNull Long idPedido) {
+                     @PathVariable @NotNull Long pedidoId) {
 
         if (request.isPagamentoOnline()) {
             throw new ResponseStatusException(BAD_REQUEST, "Esse endpoint suporta apenas pagamentos Offline");
         }
 
-        if (transacaoRepository.existsByPedidoId(idPedido)) {
+        if (transacaoRepository.existsByPedidoId(pedidoId)) {
             throw new ResponseStatusException(BAD_REQUEST, "Transação já existe");
         }
 
-        var transacao = request.toTransacao(idPedido, usuarioRepository, restauranteRepository);
+        var transacao = request.toTransacao(pedidoId, usuarioRepository, restauranteRepository);
 
         transacaoRepository.save(transacao);
 
         return transacao.getId();
+    }
+
+    @PatchMapping("/{pedidoId}")
+    @Transactional
+    public String concluiPagamentoOffline(@PathVariable Long pedidoId) {
+        var transacao = transacaoRepository.findByPedidoIdAndStatus(pedidoId, AGUARDANDO_CONFIRMACAO)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Transação não encontrada"));
+
+        if (transacao.getFormaPagamento().isOnline()) {
+            throw new ResponseStatusException(BAD_REQUEST, "Esse endpoint suporta apenas pagamentos Offline");
+        }
+
+        transacao.conclui();
+
+        return "Transação concluída";
     }
 }
