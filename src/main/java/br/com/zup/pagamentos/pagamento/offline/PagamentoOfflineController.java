@@ -60,7 +60,7 @@ public class PagamentoOfflineController {
         var transacao = transacaoRepository.findByPedidoIdAndStatus(pedidoId, AGUARDANDO_CONFIRMACAO)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Transação não encontrada"));
 
-        if (transacao.getFormaPagamento().isOnline()) {
+        if (transacao.isPagamentoOnline()) {
             throw new ResponseStatusException(BAD_REQUEST, "Esse endpoint suporta apenas pagamentos Offline");
         }
 

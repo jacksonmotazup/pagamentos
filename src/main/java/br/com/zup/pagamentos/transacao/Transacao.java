@@ -81,4 +81,8 @@ public class Transacao {
     public void conclui() {
         this.status = CONCLUIDA;
     }
+
+    public boolean isPagamentoOnline() {
+        return this.formaPagamento.isOnline();
+    }
 }
