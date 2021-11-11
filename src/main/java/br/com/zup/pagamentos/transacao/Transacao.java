@@ -54,6 +54,10 @@ public class Transacao {
         this.status = status;
     }
 
+    public BigDecimal getValor() {
+        return valor;
+    }
+
     public Long getId() {
         return id;
     }
@@ -84,5 +88,9 @@ public class Transacao {
 
     public boolean isPagamentoOnline() {
         return this.formaPagamento.isOnline();
+    }
+
+    public void ajustaValorAposTaxa(BigDecimal valor) {
+        this.valor = this.valor.subtract(valor);
     }
 }
