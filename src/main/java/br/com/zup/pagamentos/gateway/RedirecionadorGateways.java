@@ -24,7 +24,7 @@ public class RedirecionadorGateways {
 
     }
 
-    public GatewayPagamento retornaGatewayMenorTaxa(Collection<GatewayPagamento> gateways, BigDecimal valor) {
+    private GatewayPagamento retornaGatewayMenorTaxa(Collection<GatewayPagamento> gateways, BigDecimal valor) {
         return gateways.stream()
                 .min(Comparator.comparing(gateway -> gateway.calculaTaxa(valor)))
                 .orElseThrow(() -> new RuntimeException("Erro ao recuperar Gateway"));

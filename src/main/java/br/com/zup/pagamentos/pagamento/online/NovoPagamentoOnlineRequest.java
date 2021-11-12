@@ -8,13 +8,15 @@ import br.com.zup.pagamentos.transacao.Transacao;
 import br.com.zup.pagamentos.usuario.UsuarioRepository;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.constraints.NotNull;
+
 import static br.com.zup.pagamentos.transacao.StatusTransacao.EM_PROCESSAMENTO;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-public record NovoPagamentoOnlineRequest(Long usuarioId,
-                                         Long restauranteId,
-                                         FormaPagamento formaPagamento) {
+public record NovoPagamentoOnlineRequest(@NotNull Long usuarioId,
+                                         @NotNull Long restauranteId,
+                                         @NotNull FormaPagamento formaPagamento) {
 
     public boolean isPagamentoOffline() {
         return !formaPagamento.isOnline();

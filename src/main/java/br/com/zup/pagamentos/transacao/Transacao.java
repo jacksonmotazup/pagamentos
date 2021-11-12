@@ -7,6 +7,7 @@ import br.com.zup.pagamentos.usuario.Usuario;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
@@ -91,6 +92,6 @@ public class Transacao {
     }
 
     public void ajustaValorAposTaxa(BigDecimal valor) {
-        this.valor = this.valor.subtract(valor);
+        this.valor = this.valor.subtract(valor).setScale(2, RoundingMode.HALF_EVEN);
     }
 }
