@@ -13,6 +13,7 @@ import java.util.List;
 
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.CARTAO_CREDITO;
 import static br.com.zup.pagamentos.transacao.StatusTransacao.EM_PROCESSAMENTO;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -32,9 +33,13 @@ class RedirecionadorGatewaysTest {
     void teste1() {
         var transacao = criaTransacao(1.00);
 
-        var transacaoProcessada = redirecionador.processaPagamento(transacao);
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
 
-        assertEquals(valorBigDecimal(0.950), transacaoProcessada.getValor());
+        assertAll(
+                () -> assertEquals(valorBigDecimal(0.05), respostaTransacao.taxa()),
+                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
+
     }
 
     @Test
@@ -42,9 +47,13 @@ class RedirecionadorGatewaysTest {
     void teste2() {
         var transacao = criaTransacao(80.00);
 
-        var transacaoProcessada = redirecionador.processaPagamento(transacao);
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
 
-        assertEquals(valorBigDecimal(76.00), transacaoProcessada.getValor());
+        assertAll(
+                () -> assertEquals(valorBigDecimal(4.00), respostaTransacao.taxa()),
+                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
+
     }
 
     @Test
@@ -52,9 +61,13 @@ class RedirecionadorGatewaysTest {
     void teste3() {
         var transacao = criaTransacao(81.00);
 
-        var transacaoProcessada = redirecionador.processaPagamento(transacao);
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
 
-        assertEquals(valorBigDecimal(77.00), transacaoProcessada.getValor());
+        assertAll(
+                () -> assertEquals(valorBigDecimal(4.00), respostaTransacao.taxa()),
+                () -> assertEquals(TangoGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
+
     }
 
     @Test
@@ -62,9 +75,12 @@ class RedirecionadorGatewaysTest {
     void teste4() {
         var transacao = criaTransacao(100.00);
 
-        var transacaoProcessada = redirecionador.processaPagamento(transacao);
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
 
-        assertEquals(valorBigDecimal(96.00), transacaoProcessada.getValor());
+        assertAll(
+                () -> assertEquals(valorBigDecimal(4.00), respostaTransacao.taxa()),
+                () -> assertEquals(TangoGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
     }
 
     @Test
@@ -72,9 +88,13 @@ class RedirecionadorGatewaysTest {
     void teste5() {
         var transacao = criaTransacao(101.00);
 
-        var transacaoProcessada = redirecionador.processaPagamento(transacao);
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
 
-        assertEquals(valorBigDecimal(95.95), transacaoProcessada.getValor());
+        assertAll(
+                () -> assertEquals(valorBigDecimal(5.05), respostaTransacao.taxa()),
+                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
+
     }
 
     @Test
@@ -82,9 +102,12 @@ class RedirecionadorGatewaysTest {
     void teste6() {
         var transacao = criaTransacao(120.00);
 
-        var transacaoProcessada = redirecionador.processaPagamento(transacao);
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
 
-        assertEquals(valorBigDecimal(114.00), transacaoProcessada.getValor());
+        assertAll(
+                () -> assertEquals(valorBigDecimal(6.00), respostaTransacao.taxa()),
+                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
     }
 
     @Test
@@ -92,9 +115,12 @@ class RedirecionadorGatewaysTest {
     void teste7() {
         var transacao = criaTransacao(121.00);
 
-        var transacaoProcessada = redirecionador.processaPagamento(transacao);
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
+        assertAll(
+                () -> assertEquals(valorBigDecimal(6.00), respostaTransacao.taxa()),
+                () -> assertEquals(SeyaGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
 
-        assertEquals(valorBigDecimal(115.00), transacaoProcessada.getValor());
     }
 
     @Test
@@ -102,11 +128,13 @@ class RedirecionadorGatewaysTest {
     void teste8() {
         var transacao = criaTransacao(200.00);
 
-        var transacaoProcessada = redirecionador.processaPagamento(transacao);
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
+        assertAll(
+                () -> assertEquals(valorBigDecimal(6.00), respostaTransacao.taxa()),
+                () -> assertEquals(SeyaGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
 
-        assertEquals(valorBigDecimal(194.00), transacaoProcessada.getValor());
     }
-
 
 
     private Transacao criaTransacao(double valor) {

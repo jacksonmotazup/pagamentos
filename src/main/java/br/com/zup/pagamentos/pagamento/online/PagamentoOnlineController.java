@@ -43,8 +43,9 @@ public class PagamentoOnlineController {
 
         var transacao = request.paraTransacao(pedidoId, usuarioRepository, restauranteRepository);
 
-        transacao = gateway.processaPagamento(transacao);
+        var respostaTransacao = gateway.processaPagamento(transacao);
 
+        transacao.concluiTransacaoOnline(respostaTransacao);
         transacaoRepository.save(transacao);
 
     }

@@ -1,6 +1,7 @@
 package br.com.zup.pagamentos.pagamento;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Random;
 
 public record PedidoMock(Long idPedido,
@@ -9,6 +10,6 @@ public record PedidoMock(Long idPedido,
     public static PedidoMock paraPedido(Long idPedido) {
         var random = new Random();
         var numero = random.nextDouble(100);
-        return new PedidoMock(idPedido, BigDecimal.valueOf(numero));
+        return new PedidoMock(idPedido, BigDecimal.valueOf(numero).setScale(2, RoundingMode.HALF_UP));
     }
 }

@@ -1,6 +1,7 @@
 package br.com.zup.pagamentos.transacao;
 
 import br.com.zup.pagamentos.formapagamento.FormaPagamento;
+import br.com.zup.pagamentos.gateway.RespostaTransacaoGateway;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.usuario.Usuario;
 
@@ -55,6 +56,10 @@ public class Transacao {
         this.status = status;
     }
 
+    public Long getPedidoId() {
+        return pedidoId;
+    }
+
     public BigDecimal getValor() {
         return valor;
     }
@@ -83,7 +88,7 @@ public class Transacao {
         return informacoes;
     }
 
-    public void conclui() {
+    public void concluiTransacaoOffline() {
         this.status = CONCLUIDA;
     }
 
@@ -91,7 +96,8 @@ public class Transacao {
         return this.formaPagamento.isOnline();
     }
 
-    public void ajustaValorAposTaxa(BigDecimal valor) {
-        this.valor = this.valor.subtract(valor).setScale(2, RoundingMode.HALF_EVEN);
+    public void concluiTransacaoOnline(RespostaTransacaoGateway respostaTransacao) {
+        this.valor = this.valor.subtract(respostaTransacao.taxa().setScale(2, RoundingMode.HALF_UP));
+        this.status = CONCLUIDA;
     }
 }

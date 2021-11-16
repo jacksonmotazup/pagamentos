@@ -61,7 +61,7 @@ public class PagamentoOfflineController {
             throw new ResponseStatusException(BAD_REQUEST, "Esse endpoint suporta apenas pagamentos Offline");
         }
 
-        transacao.conclui();
+        transacao.concluiTransacaoOffline();
 
         return "Transação concluída";
     }

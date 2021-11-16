@@ -17,14 +17,13 @@ public class RedirecionadorGateways {
         this.gateways = gateways;
     }
 
-    public Transacao processaPagamento(Transacao transacao) {
-        var gatewayEscolhido = this.retornaGatewayMenorTaxa(gateways, transacao.getValor());
+    public RespostaTransacaoGateway processaPagamento(Transacao transacao) {
+        var gatewayEscolhido = this.encontraGatewayMenorTaxa(gateways, transacao.getValor());
 
         return gatewayEscolhido.processaPagamento(transacao);
-
     }
 
-    private GatewayPagamento retornaGatewayMenorTaxa(Collection<GatewayPagamento> gateways, BigDecimal valor) {
+    private GatewayPagamento encontraGatewayMenorTaxa(Collection<GatewayPagamento> gateways, BigDecimal valor) {
         return gateways.stream()
                 .min(Comparator.comparing(gateway -> gateway.calculaTaxa(valor)))
                 .orElseThrow(() -> new RuntimeException("Erro ao recuperar Gateway"));
