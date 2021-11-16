@@ -45,7 +45,7 @@ public class PagamentoOnlineController {
 
         var respostaTransacao = gateway.processaPagamento(transacao);
 
-        transacao.concluiTransacaoOnline(respostaTransacao);
+        transacao.concluiTransacaoOnline(respostaTransacao.taxa());
         transacaoRepository.save(transacao);
 
     }

@@ -29,7 +29,7 @@ class RedirecionadorGatewaysTest {
     private final RedirecionadorGateways redirecionador = new RedirecionadorGateways(gateways);
 
     @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 1.00")
+    @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.00 mantendo arredondamento")
     void teste1() {
         var transacao = criaTransacao(1.00);
 

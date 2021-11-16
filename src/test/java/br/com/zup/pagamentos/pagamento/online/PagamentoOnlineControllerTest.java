@@ -1,7 +1,6 @@
 package br.com.zup.pagamentos.pagamento.online;
 
 import br.com.zup.pagamentos.compartilhado.handler.ExceptionHandlerResponse;
-import br.com.zup.pagamentos.pagamento.offline.NovoPagamentoOfflineRequest;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.transacao.TransacaoRepository;
@@ -21,7 +20,6 @@ import static br.com.zup.pagamentos.formapagamento.FormaPagamento.DINHEIRO;
 import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
