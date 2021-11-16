@@ -39,12 +39,24 @@ class RedirecionadorGatewaysTest {
                 () -> assertEquals(valorBigDecimal(0.05), respostaTransacao.taxa()),
                 () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
         );
+    }
 
+    @Test
+    @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.35 mantendo arredondamento")
+    void teste2() {
+        var transacao = criaTransacao(1.35);
+
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
+
+        assertAll(
+                () -> assertEquals(valorBigDecimal(0.07), respostaTransacao.taxa()),
+                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
     }
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 80.00")
-    void teste2() {
+    void teste3() {
         var transacao = criaTransacao(80.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -58,7 +70,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 81.00")
-    void teste3() {
+    void teste4() {
         var transacao = criaTransacao(81.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -72,7 +84,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 100.00")
-    void teste4() {
+    void teste5() {
         var transacao = criaTransacao(100.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -85,7 +97,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 101.00")
-    void teste5() {
+    void teste6() {
         var transacao = criaTransacao(101.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -99,7 +111,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 120.00")
-    void teste6() {
+    void teste7() {
         var transacao = criaTransacao(120.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -112,7 +124,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 121.00")
-    void teste7() {
+    void teste8() {
         var transacao = criaTransacao(121.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -125,7 +137,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 200.00")
-    void teste8() {
+    void teste9() {
         var transacao = criaTransacao(200.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -134,6 +146,45 @@ class RedirecionadorGatewaysTest {
                 () -> assertEquals(SeyaGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
         );
 
+    }
+
+    @Test
+    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 212.23")
+    void teste10() {
+        var transacao = criaTransacao(212.23);
+
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
+        assertAll(
+                () -> assertEquals(valorBigDecimal(6.00), respostaTransacao.taxa()),
+                () -> assertEquals(SeyaGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
+
+    }
+
+    @Test
+    @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 0.11 mantendo arredondamento")
+    void teste11() {
+        var transacao = criaTransacao(0.11);
+
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
+
+        assertAll(
+                () -> assertEquals(valorBigDecimal(0.01), respostaTransacao.taxa()),
+                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
+    }
+
+    @Test
+    @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 14.29 mantendo arredondamento")
+    void teste12() {
+        var transacao = criaTransacao(14.29);
+
+        var respostaTransacao = redirecionador.processaPagamento(transacao);
+
+        assertAll(
+                () -> assertEquals(valorBigDecimal(0.71), respostaTransacao.taxa()),
+                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
+        );
     }
 
 
@@ -147,7 +198,7 @@ class RedirecionadorGatewaysTest {
                 EM_PROCESSAMENTO);
     }
 
-    private BigDecimal valorBigDecimal(double v) {
-        return BigDecimal.valueOf(v).setScale(2, RoundingMode.HALF_EVEN);
+    private BigDecimal valorBigDecimal(double valor) {
+        return BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_EVEN);
     }
 }
