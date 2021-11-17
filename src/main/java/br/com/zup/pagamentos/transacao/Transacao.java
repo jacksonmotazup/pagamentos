@@ -98,7 +98,7 @@ public class Transacao {
 
     public void concluiTransacaoOnline(BigDecimal taxa) {
         Assert.notNull(taxa, "Taxa não pode ser nula");
-        Assert.state(!taxa.equals(BigDecimal.valueOf(0)), "Valor da taxa deve ser maior que zero");
+        Assert.state(taxa.compareTo(BigDecimal.ZERO) > 0, "Valor da taxa deve ser maior que zero");
 
         this.valor = this.valor.subtract(taxa.setScale(2, RoundingMode.HALF_UP));
         this.status = CONCLUIDA;
