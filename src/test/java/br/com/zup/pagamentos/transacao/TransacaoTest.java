@@ -8,9 +8,10 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.CARTAO_CREDITO;
+import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
 import static br.com.zup.pagamentos.transacao.StatusTransacao.EM_PROCESSAMENTO;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static java.math.RoundingMode.HALF_UP;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TransacaoTest {
 
@@ -40,9 +41,10 @@ class TransacaoTest {
     void teste2() {
 
         var transacao = this.criaTransacao();
+        var valorNegativo = BigDecimal.valueOf(-1);
 
         var ex = assertThrows(IllegalStateException.class,
-                () -> transacao.concluiTransacaoOnline(BigDecimal.valueOf(-1)));
+                () -> transacao.concluiTransacaoOnline(valorNegativo));
         assertEquals("Valor da taxa deve ser maior que zero", ex.getMessage());
     }
 
@@ -53,7 +55,21 @@ class TransacaoTest {
         var transacao = this.criaTransacao();
 
         var ex = assertThrows(IllegalStateException.class,
-                () -> transacao.concluiTransacaoOnline(BigDecimal.valueOf(0)));
+                () -> transacao.concluiTransacaoOnline(BigDecimal.ZERO));
         assertEquals("Valor da taxa deve ser maior que zero", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deve aceitar valor de taxa maior que zero ao concluir transação online")
+    void teste4() {
+        var transacao = this.criaTransacao();
+
+        assertAll(
+                () -> assertDoesNotThrow(() -> transacao.concluiTransacaoOnline(BigDecimal.valueOf(1))),
+                () -> assertEquals(BigDecimal.valueOf(99.00).setScale(2, HALF_UP), transacao.getValor()),
+                () -> assertEquals(CONCLUIDA, transacao.getStatus())
+        );
+
+
     }
 }
