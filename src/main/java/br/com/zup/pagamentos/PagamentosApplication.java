@@ -5,6 +5,8 @@ import br.com.zup.pagamentos.usuario.Usuario;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.EnableCaching;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -13,6 +15,7 @@ import javax.transaction.Transactional;
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.*;
 
 @SpringBootApplication
+@EnableCaching
 public class PagamentosApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
@@ -24,6 +27,7 @@ public class PagamentosApplication implements CommandLineRunner {
 
     @Override
     @Transactional
+    @CacheEvict(value = "listaPagamentos", allEntries = true)
     public void run(String... args) {
         var usuario1 = new Usuario("usuario1@email.com", CARTAO_CREDITO);
         em.persist(usuario1);
