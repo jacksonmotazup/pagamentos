@@ -3,6 +3,7 @@ package br.com.zup.pagamentos.transacao;
 import br.com.zup.pagamentos.formapagamento.FormaPagamento;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.usuario.Usuario;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -96,6 +97,9 @@ public class Transacao {
     }
 
     public void concluiTransacaoOnline(BigDecimal taxa) {
+        Assert.notNull(taxa, "Taxa não pode ser nula");
+        Assert.state(!taxa.equals(BigDecimal.valueOf(0)), "Valor da taxa deve ser maior que zero");
+
         this.valor = this.valor.subtract(taxa.setScale(2, RoundingMode.HALF_UP));
         this.status = CONCLUIDA;
     }
