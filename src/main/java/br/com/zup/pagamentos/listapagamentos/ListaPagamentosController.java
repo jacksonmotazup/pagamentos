@@ -3,6 +3,7 @@ package br.com.zup.pagamentos.listapagamentos;
 import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.usuario.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,8 +31,8 @@ public class ListaPagamentosController {
         this.regraFraude = regraFraude;
     }
 
-
     @GetMapping
+    @Cacheable(value = "pagamentos")
     public PagamentosResponse listaPagamentosUsuarioRestaurante(@Valid @RequestBody ListaPagamentosRequest request) {
         var restaurante = restauranteRepository.findById(request.restauranteId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Restaurante não encontrado"));
@@ -43,6 +44,4 @@ public class ListaPagamentosController {
 
         return new PagamentosResponse(formasPagamentosComum);
     }
-
-
 }
