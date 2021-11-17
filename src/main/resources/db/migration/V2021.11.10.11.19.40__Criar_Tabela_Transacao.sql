@@ -6,9 +6,9 @@ CREATE TABLE transacao
     restaurante_id  BIGINT                                  NOT NULL,
     valor           DECIMAL                                 NOT NULL,
     data_criacao    TIMESTAMP WITHOUT TIME ZONE             NOT NULL,
-    forma_pagamento VARCHAR(30)                            NOT NULL,
+    forma_pagamento VARCHAR(30)                             NOT NULL,
     informacoes     VARCHAR(255),
-    status          VARCHAR(30)                            NOT NULL,
+    status          VARCHAR(30)                             NOT NULL,
     CONSTRAINT pk_transacao PRIMARY KEY (id)
 );
 

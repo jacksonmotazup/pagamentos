@@ -24,7 +24,6 @@ import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -221,7 +220,7 @@ class PagamentoOfflineControllerTest {
                     null, AGUARDANDO_CONFIRMACAO);
             transacaoRepository.save(transacao);
 
-            var response = mockMvc.perform(patch(URI_PAGAMENTO_OFFLINE_CONCLUIR))
+            var response = mockMvc.perform(post(URI_PAGAMENTO_OFFLINE_CONCLUIR))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
@@ -241,7 +240,7 @@ class PagamentoOfflineControllerTest {
                     null, AGUARDANDO_CONFIRMACAO);
             transacaoRepository.save(transacao);
 
-            var response = mockMvc.perform(patch(URI_PAGAMENTO_OFFLINE_CONCLUIR))
+            var response = mockMvc.perform(post(URI_PAGAMENTO_OFFLINE_CONCLUIR))
                     .andExpect(status().isBadRequest())
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
@@ -261,7 +260,7 @@ class PagamentoOfflineControllerTest {
         @DisplayName("Não deve concluir uma transação para um pagamento OFFLINE quando a transação não existir pelo pedidoId, retornar 404")
         void teste3() throws Exception {
 
-            var response = mockMvc.perform(patch(URI_PAGAMENTO_OFFLINE_CONCLUIR))
+            var response = mockMvc.perform(post(URI_PAGAMENTO_OFFLINE_CONCLUIR))
                     .andExpect(status().isNotFound())
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
@@ -283,7 +282,7 @@ class PagamentoOfflineControllerTest {
                     null, CONCLUIDA);
             transacaoRepository.save(transacao);
 
-            var response = mockMvc.perform(patch(URI_PAGAMENTO_OFFLINE_CONCLUIR))
+            var response = mockMvc.perform(post(URI_PAGAMENTO_OFFLINE_CONCLUIR))
                     .andExpect(status().isNotFound())
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
