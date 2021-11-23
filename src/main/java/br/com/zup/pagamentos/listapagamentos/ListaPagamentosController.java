@@ -32,7 +32,7 @@ public class ListaPagamentosController {
     }
 
     @GetMapping
-//    @Cacheable(value = "pagamentos")
+    @Cacheable(value = "pagamentos")
     public PagamentosResponse listaPagamentosUsuarioRestaurante(@Valid @RequestBody ListaPagamentosRequest request) {
         var restaurante = restauranteRepository.findById(request.restauranteId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Restaurante não encontrado"));
