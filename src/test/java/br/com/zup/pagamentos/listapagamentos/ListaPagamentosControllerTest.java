@@ -1,6 +1,5 @@
 package br.com.zup.pagamentos.listapagamentos;
 
-import br.com.zup.pagamentos.compartilhado.handler.ExceptionHandlerResponse;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.usuario.Usuario;
@@ -83,89 +82,95 @@ class ListaPagamentosControllerTest {
                     () -> assertFalse(resposta.formasPagamento().contains(MAQUINA))
             );
         }
-
-        @Test
-        @DisplayName("Deve retornar lista vazia quando não houverem formas de pagamento em comum, retornar 200")
-        void teste2() throws Exception {
-            var request = new ListaPagamentosRequest(usuario.getId(), restaurante2.getId());
-
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
-                    .andExpect(status().isOk())
-                    .andReturn().getResponse().getContentAsString(UTF_8);
-
-            var resposta = (PagamentosResponse) fromJson(response, PagamentosResponse.class);
-
-            assertAll(
-                    () -> assertEquals(0, resposta.formasPagamento().size()),
-                    () -> assertFalse(resposta.formasPagamento().contains(CARTAO_CREDITO)),
-                    () -> assertFalse(resposta.formasPagamento().contains(DINHEIRO)),
-                    () -> assertFalse(resposta.formasPagamento().contains(CHEQUE)),
-                    () -> assertFalse(resposta.formasPagamento().contains(MAQUINA))
-            );
-        }
-
-        @Test
-        @DisplayName("Não deve retornar lista de formas de pagamento quando usuário não existir, retornar 404")
-        void teste3() throws Exception {
-            var request = new ListaPagamentosRequest(Long.MAX_VALUE, restaurante.getId());
-
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
-                    .andExpect(status().isNotFound())
-                    .andReturn().getResponse().getContentAsString(UTF_8);
-
-            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
-
-            assertAll(
-                    () -> assertTrue(resposta.erros().get("mensagem").contains("Usuário não encontrado")),
-                    () -> assertEquals(1, resposta.erros().get("mensagem").size())
-            );
-        }
-
-        @Test
-        @DisplayName("Não deve retornar lista de formas de pagamento quando restaurante não existir, retornar 404")
-        void teste4() throws Exception {
-            var request = new ListaPagamentosRequest(usuario.getId(), Long.MAX_VALUE);
-
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
-                    .andExpect(status().isNotFound())
-                    .andReturn().getResponse().getContentAsString(UTF_8);
-
-            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
-
-            assertAll(
-                    () -> assertTrue(resposta.erros().get("mensagem").contains("Restaurante não encontrado")),
-                    () -> assertEquals(1, resposta.erros().get("mensagem").size())
-            );
-        }
-
-        @Test
-        @DisplayName("Deve retornar apenas formas de pagamento OFFLINE quando o email começar com J (regra ficticia de fraude")
-        void teste5() throws Exception {
-
-            var request = new ListaPagamentosRequest(usuario2.getId(), restaurante.getId());
-
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
-                    .andExpect(status().isOk())
-                    .andReturn().getResponse().getContentAsString(UTF_8);
-
-            var resposta = (PagamentosResponse) fromJson(response, PagamentosResponse.class);
-
-            assertAll(
-                    () -> assertEquals(2, resposta.formasPagamento().size()),
-                    () -> assertTrue(resposta.formasPagamento().contains(CHEQUE)),
-                    () -> assertTrue(resposta.formasPagamento().contains(DINHEIRO)),
-                    () -> assertFalse(resposta.formasPagamento().contains(CARTAO_CREDITO))
-            );
-        }
     }
+
+    // Teste comentado para documentação de teste de carga
+//        @Test
+//        @DisplayName("Deve retornar lista vazia quando não houverem formas de pagamento em comum, retornar 200")
+//        void teste2() throws Exception {
+//            var request = new ListaPagamentosRequest(usuario.getId(), restaurante2.getId());
+//
+//            var response = mockMvc.perform(get(URI_PAGAMENTOS)
+//                            .contentType(APPLICATION_JSON)
+//                            .content(toJson(request)))
+//                    .andExpect(status().isOk())
+//                    .andReturn().getResponse().getContentAsString(UTF_8);
+//
+//            var resposta = (PagamentosResponse) fromJson(response, PagamentosResponse.class);
+//
+//            assertAll(
+//                    () -> assertEquals(0, resposta.formasPagamento().size()),
+//                    () -> assertFalse(resposta.formasPagamento().contains(CARTAO_CREDITO)),
+//                    () -> assertFalse(resposta.formasPagamento().contains(DINHEIRO)),
+//                    () -> assertFalse(resposta.formasPagamento().contains(CHEQUE)),
+//                    () -> assertFalse(resposta.formasPagamento().contains(MAQUINA))
+//            );
+//        }
+
+    // Teste comentado para documentação de teste de carga
+//        @Test
+//        @DisplayName("Não deve retornar lista de formas de pagamento quando usuário não existir, retornar 404")
+//        void teste3() throws Exception {
+//            var request = new ListaPagamentosRequest(Long.MAX_VALUE, restaurante.getId());
+//
+//            var response = mockMvc.perform(get(URI_PAGAMENTOS)
+//                            .contentType(APPLICATION_JSON)
+//                            .content(toJson(request)))
+//                    .andExpect(status().isNotFound())
+//                    .andReturn().getResponse().getContentAsString(UTF_8);
+//
+//            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
+//
+//            assertAll(
+//                    () -> assertTrue(resposta.erros().get("mensagem").contains("Usuário não encontrado")),
+//                    () -> assertEquals(1, resposta.erros().get("mensagem").size())
+//            );
+//        }
+
+    // Teste comentado para documentação de teste de carga
+//        @Test
+//        @DisplayName("Não deve retornar lista de formas de pagamento quando restaurante não existir, retornar 404")
+//        void teste4() throws Exception {
+//            var request = new ListaPagamentosRequest(usuario.getId(), Long.MAX_VALUE);
+//
+//            var response = mockMvc.perform(get(URI_PAGAMENTOS)
+//                            .contentType(APPLICATION_JSON)
+//                            .content(toJson(request)))
+//                    .andExpect(status().isNotFound())
+//                    .andReturn().getResponse().getContentAsString(UTF_8);
+//
+//            var resposta = (ExceptionHandlerResponse) fromJson(response, ExceptionHandlerResponse.class);
+//
+//            assertAll(
+//                    () -> assertTrue(resposta.erros().get("mensagem").contains("Restaurante não encontrado")),
+//                    () -> assertEquals(1, resposta.erros().get("mensagem").size())
+//            );
+//        }
+
+
+    // Teste comentado para documentação de teste de carga
+//        @Test
+//        @DisplayName("Deve retornar apenas formas de pagamento OFFLINE quando o email começar com J (regra ficticia de fraude")
+//        void teste5() throws Exception {
+//
+//            var request = new ListaPagamentosRequest(usuario2.getId(), restaurante.getId());
+//
+//            var response = mockMvc.perform(get(URI_PAGAMENTOS)
+//                            .contentType(APPLICATION_JSON)
+//                            .content(toJson(request)))
+//                    .andExpect(status().isOk())
+//                    .andReturn().getResponse().getContentAsString(UTF_8);
+//
+//            var resposta = (PagamentosResponse) fromJson(response, PagamentosResponse.class);
+//
+//            assertAll(
+//                    () -> assertEquals(2, resposta.formasPagamento().size()),
+//                    () -> assertTrue(resposta.formasPagamento().contains(CHEQUE)),
+//                    () -> assertTrue(resposta.formasPagamento().contains(DINHEIRO)),
+//                    () -> assertFalse(resposta.formasPagamento().contains(CARTAO_CREDITO))
+//            );
+//        }
+//    }
 
 
     private String toJson(Object obj) throws JsonProcessingException {
