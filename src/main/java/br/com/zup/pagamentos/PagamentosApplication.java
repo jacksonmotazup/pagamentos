@@ -1,5 +1,7 @@
 package br.com.zup.pagamentos;
 
+import br.com.zup.pagamentos.restaurante.Restaurante;
+import br.com.zup.pagamentos.usuario.Usuario;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,6 +10,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+
+import static br.com.zup.pagamentos.formapagamento.FormaPagamento.*;
 
 @SpringBootApplication
 public class PagamentosApplication implements CommandLineRunner {
@@ -23,6 +27,15 @@ public class PagamentosApplication implements CommandLineRunner {
     @Transactional
     @CacheEvict(value = "pagamentos", allEntries = true)
     public void run(String... args) {
+//        for (int i = 0; i <= 1000000; i++) {
+//            var usuario = new Usuario("usuario" + i + "@email.com", CARTAO_CREDITO, DINHEIRO, CHEQUE);
+//            em.persist(usuario);
+//
+//            var restaurante = new Restaurante("Restaurante." + i, CARTAO_CREDITO, DINHEIRO, MAQUINA);
+//            em.persist(restaurante);
+//        }
+
+
 //        var usuario1 = new Usuario("usuario1@email.com", CARTAO_CREDITO);
 //        em.persist(usuario1);
 //        var usuario2 = new Usuario("usuario2@email.com", CARTAO_CREDITO, MAQUINA);
