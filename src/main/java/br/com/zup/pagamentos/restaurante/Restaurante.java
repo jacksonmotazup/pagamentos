@@ -20,7 +20,7 @@ public class Restaurante {
     @ElementCollection
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Set<FormaPagamento> formasPagamentoAceitas = new HashSet<>();
+    private final Set<FormaPagamento> formasPagamentoAceitas = new HashSet<>();
 
     /**
      * @deprecated hibernate
