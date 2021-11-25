@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class ListaPagamentosControllerTest {
 
-    public static final String URI_PAGAMENTOS = "/api/v1/pagamentos";
+    public static final String URI_PAGAMENTOS = "/api/v1/pagamentos?";
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -67,9 +67,7 @@ class ListaPagamentosControllerTest {
         void teste1() throws Exception {
             var request = new ListaPagamentosRequest(usuario.getId(), restaurante.getId());
 
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
+            var response = mockMvc.perform(get(criaUri(request)))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
@@ -84,14 +82,14 @@ class ListaPagamentosControllerTest {
             );
         }
 
+
+
         @Test
         @DisplayName("Deve retornar lista vazia quando não houverem formas de pagamento em comum, retornar 200")
         void teste2() throws Exception {
             var request = new ListaPagamentosRequest(usuario.getId(), restaurante2.getId());
 
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
+            var response = mockMvc.perform(get(criaUri(request)))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
@@ -111,9 +109,7 @@ class ListaPagamentosControllerTest {
         void teste3() throws Exception {
             var request = new ListaPagamentosRequest(Long.MAX_VALUE, restaurante.getId());
 
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
+            var response = mockMvc.perform(get(criaUri(request)))
                     .andExpect(status().isNotFound())
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
@@ -130,9 +126,7 @@ class ListaPagamentosControllerTest {
         void teste4() throws Exception {
             var request = new ListaPagamentosRequest(usuario.getId(), Long.MAX_VALUE);
 
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
+            var response = mockMvc.perform(get(criaUri(request)))
                     .andExpect(status().isNotFound())
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
@@ -150,10 +144,7 @@ class ListaPagamentosControllerTest {
 
             var request = new ListaPagamentosRequest(usuario2.getId(), restaurante.getId());
 
-            var response = mockMvc.perform(get(URI_PAGAMENTOS)
-                            .contentType(APPLICATION_JSON)
-                            .content(toJson(request)))
-                    .andExpect(status().isOk())
+            var response = mockMvc.perform(get(criaUri(request)))
                     .andReturn().getResponse().getContentAsString(UTF_8);
 
             var resposta = (PagamentosResponse) fromJson(response, PagamentosResponse.class);
@@ -174,6 +165,10 @@ class ListaPagamentosControllerTest {
 
     public Object fromJson(String json, Class<?> classe) throws JsonProcessingException {
         return mapper.readValue(json, classe);
+    }
+
+    private String criaUri(ListaPagamentosRequest request) {
+        return URI_PAGAMENTOS + "usuarioId=" + request.usuarioId() + "&" + "restauranteId=" + request.restauranteId();
     }
 
 }
