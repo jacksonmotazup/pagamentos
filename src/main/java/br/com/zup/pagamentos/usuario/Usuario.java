@@ -24,7 +24,7 @@ public class Usuario {
     @Column(nullable = false)
     @ElementCollection
     @Enumerated(EnumType.STRING)
-    private Set<FormaPagamento> formasPagamento = new HashSet<>();
+    private final Set<FormaPagamento> formasPagamento = new HashSet<>();
 
     /**
      * @deprecated hibernate

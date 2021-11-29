@@ -5,7 +5,6 @@ import br.com.zup.pagamentos.usuario.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,12 +31,12 @@ public class ListaPagamentosController {
     }
 
     @GetMapping
-    @Cacheable(value = "pagamentos")
-    public PagamentosResponse listaPagamentosUsuarioRestaurante(@Valid @RequestBody ListaPagamentosRequest request) {
-        var restaurante = restauranteRepository.findById(request.restauranteId())
+    @Cacheable("pagamentos")
+    public PagamentosResponse listaPagamentosUsuarioRestaurante(@Valid ListaPagamentosRequest request) {
+        var restaurante = restauranteRepository.findByIdComFormasPagamento(request.restauranteId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Restaurante não encontrado"));
 
-        var usuario = usuarioRepository.findById(request.usuarioId())
+        var usuario = usuarioRepository.findByIdComFormasPagamento(request.usuarioId())
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
 
         var formasPagamentosComum = usuario.formasAceitas(restaurante, regraFraude);
