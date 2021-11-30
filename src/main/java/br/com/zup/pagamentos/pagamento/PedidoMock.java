@@ -8,8 +8,12 @@ public record PedidoMock(Long idPedido,
                          BigDecimal valor) {
 
     public static PedidoMock paraPedido(Long idPedido) throws InterruptedException {
-        var tempo = new Random().nextInt(5, 20);
+        var random = new Random();
+
+        var tempo = random.nextInt(5, 20);
         Thread.sleep(tempo);
-        return new PedidoMock(idPedido, BigDecimal.valueOf(100).setScale(2, RoundingMode.HALF_UP));
+
+        var valor = random.nextInt(1, 2000);
+        return new PedidoMock(idPedido, BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_UP));
     }
 }
