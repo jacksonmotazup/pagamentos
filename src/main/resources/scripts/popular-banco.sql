@@ -1,6 +1,5 @@
 insert into usuario (email)
-select
-    left (md5(random()::text), 6) || '@zup.com.br' as email
+select left(md5(random()::text), 6) || '@zup.com.br' as email
 
 from generate_series(1, 1000000) s(i);
 
@@ -35,4 +34,16 @@ select r.id,
 from restaurante r,
      formas_pag f
 ;
+
+insert into transacao (pedido_id, usuario_id, restaurante_id, valor, data_criacao, forma_pagamento, informacoes, status)
+select i                as pedido_id
+     , 1                as usuario_id
+     , 1                as restaurante_id
+     , 100              as valor
+     , localtimestamp   as data_criacao
+     , 'CARTAO_CREDITO' as forma_pagamento
+     , null             as informacoes
+     , 'CONCLUIDA'      as status
+
+from generate_series(-1000000, -1) s(i);
 
