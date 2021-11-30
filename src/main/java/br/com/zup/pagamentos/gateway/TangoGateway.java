@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -19,7 +20,10 @@ public class TangoGateway implements GatewayPagamento {
     }
 
     @Override
-    public RespostaTransacaoGateway processaPagamento(Transacao transacao) {
+    public RespostaTransacaoGateway processaPagamento(Transacao transacao) throws InterruptedException {
+        var tempo = new Random().nextInt(50, 100);
+        Thread.sleep(tempo);
+
         var taxa = this.calculaTaxa(transacao.getValor());
 
         return new RespostaTransacaoGateway(UUID.randomUUID(),

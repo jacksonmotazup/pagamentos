@@ -30,7 +30,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.00 mantendo arredondamento")
-    void teste1() {
+    void teste1() throws InterruptedException {
         var transacao = criaTransacao(1.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -43,7 +43,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.35 mantendo arredondamento")
-    void teste2() {
+    void teste2() throws InterruptedException {
         var transacao = criaTransacao(1.35);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -56,7 +56,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 80.00")
-    void teste3() {
+    void teste3() throws InterruptedException {
         var transacao = criaTransacao(80.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -70,7 +70,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 81.00")
-    void teste4() {
+    void teste4() throws InterruptedException {
         var transacao = criaTransacao(81.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -84,7 +84,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 100.00")
-    void teste5() {
+    void teste5() throws InterruptedException {
         var transacao = criaTransacao(100.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -97,7 +97,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 101.00")
-    void teste6() {
+    void teste6() throws InterruptedException {
         var transacao = criaTransacao(101.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -111,7 +111,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 120.00")
-    void teste7() {
+    void teste7() throws InterruptedException {
         var transacao = criaTransacao(120.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -124,7 +124,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 121.00")
-    void teste8() {
+    void teste8() throws InterruptedException {
         var transacao = criaTransacao(121.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -137,7 +137,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 200.00")
-    void teste9() {
+    void teste9() throws InterruptedException {
         var transacao = criaTransacao(200.00);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -150,7 +150,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 212.23")
-    void teste10() {
+    void teste10() throws InterruptedException {
         var transacao = criaTransacao(212.23);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -163,7 +163,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 0.11 mantendo arredondamento")
-    void teste11() {
+    void teste11() throws InterruptedException {
         var transacao = criaTransacao(0.11);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
@@ -176,7 +176,7 @@ class RedirecionadorGatewaysTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 14.29 mantendo arredondamento")
-    void teste12() {
+    void teste12() throws InterruptedException {
         var transacao = criaTransacao(14.29);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);

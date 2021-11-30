@@ -8,5 +8,5 @@ public interface GatewayPagamento {
 
     BigDecimal calculaTaxa(BigDecimal valor);
 
-    RespostaTransacaoGateway processaPagamento(Transacao transacao);
+    RespostaTransacaoGateway processaPagamento(Transacao transacao) throws InterruptedException;
 }
