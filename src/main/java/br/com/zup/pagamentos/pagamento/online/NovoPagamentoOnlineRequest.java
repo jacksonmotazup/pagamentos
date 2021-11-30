@@ -24,10 +24,10 @@ public record NovoPagamentoOnlineRequest(@NotNull Long usuarioId,
 
     public Transacao paraTransacao(Long pedidoId, UsuarioRepository usuarioRepository,
                                    RestauranteRepository restauranteRepository) throws InterruptedException {
-        var restaurante = restauranteRepository.findById(this.restauranteId)
+        var restaurante = restauranteRepository.findByIdComFormasPagamento(this.restauranteId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Restaurante não encontrado"));
 
-        var usuario = usuarioRepository.findById(this.usuarioId)
+        var usuario = usuarioRepository.findByIdComFormasPagamento(this.usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
 
         boolean podePagar = usuario.podePagar(restaurante, this.formaPagamento, new RegraFraudeEmail());
