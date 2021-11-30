@@ -18,7 +18,7 @@ public record NovoPagamentoOfflineRequest(@NotNull FormaPagamento formaPagamento
                                           @NotNull Long idRestaurante,
                                           @NotNull Long idUsuario) {
 
-    public Transacao toTransacao(@NotNull Long idPedido, UsuarioRepository usuarioRepository, RestauranteRepository restauranteRepository) {
+    public Transacao toTransacao(@NotNull Long idPedido, UsuarioRepository usuarioRepository, RestauranteRepository restauranteRepository) throws InterruptedException {
         var restaurante = restauranteRepository.findById(this.idRestaurante)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Restaurante não encontrado"));
 

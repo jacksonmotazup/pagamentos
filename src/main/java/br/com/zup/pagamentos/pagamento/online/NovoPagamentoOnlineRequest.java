@@ -22,7 +22,7 @@ public record NovoPagamentoOnlineRequest(@NotNull Long usuarioId,
         return !formaPagamento.isOnline();
     }
 
-    public Transacao paraTransacao(Long pedidoId, UsuarioRepository usuarioRepository, RestauranteRepository restauranteRepository) {
+    public Transacao paraTransacao(Long pedidoId, UsuarioRepository usuarioRepository, RestauranteRepository restauranteRepository) throws InterruptedException {
         var restaurante = restauranteRepository.findById(this.restauranteId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Restaurante não encontrado"));
 

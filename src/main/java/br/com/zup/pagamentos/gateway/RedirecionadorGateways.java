@@ -17,7 +17,7 @@ public class RedirecionadorGateways {
         this.gateways = gateways;
     }
 
-    public RespostaTransacaoGateway processaPagamento(Transacao transacao) {
+    public RespostaTransacaoGateway processaPagamento(Transacao transacao) throws InterruptedException {
         var gatewayEscolhido = this.encontraGatewayMenorTaxa(gateways, transacao.getValor());
 
         return gatewayEscolhido.processaPagamento(transacao);

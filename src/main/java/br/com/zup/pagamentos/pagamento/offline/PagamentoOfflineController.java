@@ -34,7 +34,7 @@ public class PagamentoOfflineController {
     @PostMapping("/{pedidoId}")
     @Transactional
     public Long paga(@PathVariable Long pedidoId,
-                     @RequestBody @Valid NovoPagamentoOfflineRequest request) {
+                     @RequestBody @Valid NovoPagamentoOfflineRequest request) throws InterruptedException {
 
         if (request.isPagamentoOnline()) {
             throw new ResponseStatusException(BAD_REQUEST, "Esse endpoint suporta apenas pagamentos Offline");
