@@ -23,7 +23,7 @@ public record NovoPagamentoOnlineRequest(@NotNull Long usuarioId,
     }
 
     public Transacao paraTransacao(Long pedidoId, UsuarioRepository usuarioRepository,
-                                   RestauranteRepository restauranteRepository) throws InterruptedException {
+                                   RestauranteRepository restauranteRepository){
         var restaurante = restauranteRepository.findByIdComFormasPagamento(this.restauranteId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Restaurante não encontrado"));
 
@@ -37,9 +37,7 @@ public record NovoPagamentoOnlineRequest(@NotNull Long usuarioId,
                     "restaurante não é válida");
         }
 
-        var pedido = PedidoMock.paraPedido(pedidoId);
-
-        return new Transacao(pedido.idPedido(), usuario, restaurante, pedido.valor(), this.formaPagamento,
+        return new Transacao(pedidoId, usuario, restaurante, null, this.formaPagamento,
                 null, EM_PROCESSAMENTO);
     }
 }

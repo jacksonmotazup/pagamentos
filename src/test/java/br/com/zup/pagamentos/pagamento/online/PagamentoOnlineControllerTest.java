@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.CARTAO_CREDITO;
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.DINHEIRO;
 import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
+import static br.com.zup.pagamentos.transacao.StatusTransacao.EM_PROCESSAMENTO;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -79,7 +80,7 @@ class PagamentoOnlineControllerTest {
 
             assertAll(
                     () -> assertEquals(1, transacoes.size()),
-                    () -> assertEquals(CONCLUIDA, transacoes.get(0).getStatus())
+                    () -> assertEquals(EM_PROCESSAMENTO, transacoes.get(0).getStatus())
             );
         }
 
