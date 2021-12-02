@@ -30,8 +30,8 @@ public class ProcessadorPagamentoOnline {
                 .orElseThrow(() -> new RuntimeException("por algum motivo a transação não foi encontrada"));
 
         try {
-            var respostaTransacao = gateway.processaPagamento(transacao);
             transacao.adicionaValor(pedido.valor());
+            var respostaTransacao = gateway.processaPagamento(transacao);
             transacao.concluiTransacaoOnline(respostaTransacao.taxa());
         } catch (Exception ex) {
             transacao.marcaComoErro();
