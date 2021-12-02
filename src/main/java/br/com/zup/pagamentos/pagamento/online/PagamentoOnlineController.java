@@ -4,7 +4,6 @@ import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.transacao.TransacaoRepository;
 import br.com.zup.pagamentos.usuario.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 

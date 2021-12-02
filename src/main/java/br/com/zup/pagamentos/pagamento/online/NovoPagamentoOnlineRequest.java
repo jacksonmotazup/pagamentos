@@ -2,7 +2,6 @@ package br.com.zup.pagamentos.pagamento.online;
 
 import br.com.zup.pagamentos.formapagamento.FormaPagamento;
 import br.com.zup.pagamentos.listapagamentos.RegraFraudeEmail;
-import br.com.zup.pagamentos.pagamento.PedidoMock;
 import br.com.zup.pagamentos.restaurante.RestauranteRepository;
 import br.com.zup.pagamentos.transacao.Transacao;
 import br.com.zup.pagamentos.usuario.UsuarioRepository;
