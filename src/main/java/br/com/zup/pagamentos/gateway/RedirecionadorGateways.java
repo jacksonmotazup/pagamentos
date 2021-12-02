@@ -13,6 +13,7 @@ public class RedirecionadorGateways {
     private final Collection<GatewayPagamento> gateways;
 
     @Autowired
+
     public RedirecionadorGateways(Collection<GatewayPagamento> gateways) {
         this.gateways = gateways;
     }

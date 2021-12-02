@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
+import static br.com.zup.pagamentos.transacao.StatusTransacao.ERRO_PROCESSAMENTO;
 import static javax.persistence.EnumType.STRING;
 
 @Entity
@@ -28,7 +29,6 @@ public class Transacao {
     @ManyToOne
     @NotNull
     private Restaurante restaurante;
-    @NotNull
     private BigDecimal valor;
     @NotNull
     private LocalDateTime dataCriacao = LocalDateTime.now();
@@ -102,5 +102,13 @@ public class Transacao {
 
         this.valor = this.valor.subtract(taxa.setScale(2, RoundingMode.HALF_UP));
         this.status = CONCLUIDA;
+    }
+
+    public void marcaComoErro() {
+        this.status = ERRO_PROCESSAMENTO;
+    }
+
+    public void adicionaValor(BigDecimal valor) {
+        this.valor = valor;
     }
 }

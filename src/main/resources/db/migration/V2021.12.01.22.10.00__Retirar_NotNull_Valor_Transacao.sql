@@ -1,0 +1,1 @@
+ALTER TABLE public.transacao ALTER COLUMN valor DROP NOT NULL;

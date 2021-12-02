@@ -19,6 +19,7 @@ import static br.com.zup.pagamentos.formapagamento.FormaPagamento.CARTAO_CREDITO
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.DINHEIRO;
 import static br.com.zup.pagamentos.transacao.StatusTransacao.CONCLUIDA;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -75,6 +76,7 @@ class PagamentoOnlineControllerTest {
                             .content(toJson(request)))
                     .andExpect(status().isOk());
 
+            await().until(() -> transacaoRepository.findByPedidoId(PEDIDO_ID).getStatus() == CONCLUIDA);
             var transacoes = transacaoRepository.findAll();
 
             assertAll(

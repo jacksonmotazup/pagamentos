@@ -11,4 +11,5 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
     Optional<Transacao> findByPedidoIdAndStatus(Long pedidoId, StatusTransacao statusTransacao);
 
 
+    Transacao findByPedidoId(Long pedidoId);
 }
