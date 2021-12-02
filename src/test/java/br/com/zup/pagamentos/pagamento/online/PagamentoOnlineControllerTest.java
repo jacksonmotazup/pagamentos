@@ -76,7 +76,7 @@ class PagamentoOnlineControllerTest {
                             .content(toJson(request)))
                     .andExpect(status().isOk());
 
-            await().until(() -> transacaoRepository.findAll().get(0).getStatus() == CONCLUIDA);
+            await().until(() -> transacaoRepository.findByPedidoId(PEDIDO_ID).getStatus() == CONCLUIDA);
             var transacoes = transacaoRepository.findAll();
 
             assertAll(
