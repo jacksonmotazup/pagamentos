@@ -1,5 +1,6 @@
 package br.com.zup.pagamentos.gateway;
 
+import br.com.zup.pagamentos.compartilhado.exceptions.GatewayOfflineException;
 import br.com.zup.pagamentos.transacao.Transacao;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +14,20 @@ import java.util.UUID;
 public class SaoriGateway implements GatewayPagamento {
     @Override
     public BigDecimal calculaTaxa(BigDecimal valor) {
-        return valor.multiply(BigDecimal.valueOf(0.05).setScale(2, RoundingMode.HALF_UP));
+        return valor.multiply(BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP));
     }
 
     @Override
     public RespostaTransacaoGateway processaPagamento(Transacao transacao) throws InterruptedException {
-        var tempo = new Random().nextInt(70, 150);
+        var random = new Random();
+
+        var tempo = random.nextInt(70, 150);
         Thread.sleep(tempo);
+
+        var simulaPossivelException = random.nextInt(1, 10);
+        if (simulaPossivelException == 1){
+            throw new GatewayOfflineException("Gateway "+ this.getClass().getSimpleName() + " está offline.");
+        }
 
         var taxa = this.calculaTaxa(transacao.getValor());
 

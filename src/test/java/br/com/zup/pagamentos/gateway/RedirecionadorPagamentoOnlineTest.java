@@ -23,10 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Para compras de até 100 reais, o custo é fixo de 4.00. Para operações com valor maior que 100,
  * o custo vira de 6% do valor total.
  */
-class RedirecionadorGatewaysTest {
+class RedirecionadorPagamentoOnlineTest {
 
     private final Collection<GatewayPagamento> gateways = List.of(new SaoriGateway(), new SeyaGateway(), new TangoGateway());
-    private final RedirecionadorGateways redirecionador = new RedirecionadorGateways(gateways);
+    private final RedirecionadorPagamentoOnline redirecionador = new RedirecionadorPagamentoOnline(gateways);
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.00 mantendo arredondamento")

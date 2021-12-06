@@ -1,5 +1,6 @@
 package br.com.zup.pagamentos.gateway;
 
+import br.com.zup.pagamentos.compartilhado.exceptions.GatewayOfflineException;
 import br.com.zup.pagamentos.transacao.Transacao;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +22,15 @@ public class TangoGateway implements GatewayPagamento {
 
     @Override
     public RespostaTransacaoGateway processaPagamento(Transacao transacao) throws InterruptedException {
-        var tempo = new Random().nextInt(50, 100);
+        var random = new Random();
+
+        var tempo = random.nextInt(50, 100);
         Thread.sleep(tempo);
+
+        var simulaPossivelException = random.nextInt(1, 10);
+        if (simulaPossivelException == 1) {
+            throw new GatewayOfflineException("Gateway " + this.getClass().getSimpleName() + " está offline.");
+        }
 
         var taxa = this.calculaTaxa(transacao.getValor());
 
