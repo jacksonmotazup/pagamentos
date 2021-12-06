@@ -12,7 +12,7 @@ import java.util.UUID;
 public class SaoriGateway implements GatewayPagamento {
     @Override
     public BigDecimal calculaTaxa(BigDecimal valor) {
-        return valor.multiply(BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP));
+        return valor.multiply(BigDecimal.valueOf(0.05).setScale(2, RoundingMode.HALF_UP));
     }
 
     @Override
@@ -31,6 +31,4 @@ public class SaoriGateway implements GatewayPagamento {
                 LocalDateTime.now(),
                 transacao.getPedidoId());
     }
-
-
 }

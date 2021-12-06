@@ -5,16 +5,20 @@ import br.com.zup.pagamentos.transacao.Transacao;
 import br.com.zup.pagamentos.usuario.Usuario;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.CARTAO_CREDITO;
 import static br.com.zup.pagamentos.transacao.StatusTransacao.EM_PROCESSAMENTO;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 /**
  * - Gateway Seya opera no brasil, aceita todas bandeiras, tem custo fixo de 6.00.
@@ -23,15 +27,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Para compras de até 100 reais, o custo é fixo de 4.00. Para operações com valor maior que 100,
  * o custo vira de 6% do valor total.
  */
-class RedirecionadorPagamentoOnlineTest {
 
-    private final Collection<GatewayPagamento> gateways = List.of(new SaoriGateway(), new SeyaGateway(), new TangoGateway());
-    private final RedirecionadorPagamentoOnline redirecionador = new RedirecionadorPagamentoOnline(gateways);
+@ExtendWith(MockitoExtension.class)
+class RedirecionadorPagamentoOnlineTest {
+    private final Long PEDIDO_ID = 123L;
+    SaoriGateway saori = new SaoriGateway();
+    SeyaGateway seya = new SeyaGateway();
+    TangoGateway tango = new TangoGateway();
+
+    @Mock
+    private RedirecionadorPagamentoOnline redirecionador;
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.00 mantendo arredondamento")
-    void teste1() throws InterruptedException {
+    void teste1() {
         var transacao = criaTransacao(1.00);
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
+                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 
@@ -43,8 +58,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.35 mantendo arredondamento")
-    void teste2() throws InterruptedException {
+    void teste2(){
         var transacao = criaTransacao(1.35);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
+                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 
@@ -56,8 +77,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 80.00")
-    void teste3() throws InterruptedException {
+    void teste3() {
         var transacao = criaTransacao(80.00);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
+                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 
@@ -70,8 +97,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 81.00")
-    void teste4() throws InterruptedException {
+    void teste4() {
         var transacao = criaTransacao(81.00);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), tango,
+                tango.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 
@@ -84,8 +117,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 100.00")
-    void teste5() throws InterruptedException {
+    void teste5() {
         var transacao = criaTransacao(100.00);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), tango,
+                tango.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 
@@ -97,8 +136,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 101.00")
-    void teste6() throws InterruptedException {
+    void teste6() {
         var transacao = criaTransacao(101.00);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
+                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 
@@ -111,8 +156,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 120.00")
-    void teste7() throws InterruptedException {
+    void teste7() {
         var transacao = criaTransacao(120.00);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
+                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 
@@ -124,8 +175,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 121.00")
-    void teste8() throws InterruptedException {
+    void teste8() {
         var transacao = criaTransacao(121.00);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), seya,
+                seya.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
         assertAll(
@@ -137,8 +194,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 200.00")
-    void teste9() throws InterruptedException {
+    void teste9()  {
         var transacao = criaTransacao(200.00);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), seya,
+                seya.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
         assertAll(
@@ -150,8 +213,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 212.23")
-    void teste10() throws InterruptedException {
+    void teste10() {
         var transacao = criaTransacao(212.23);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), seya,
+                seya.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
         assertAll(
@@ -163,8 +232,14 @@ class RedirecionadorPagamentoOnlineTest {
 
     @Test
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 0.11 mantendo arredondamento")
-    void teste11() throws InterruptedException {
+    void teste11() {
         var transacao = criaTransacao(0.11);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
+                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 
@@ -178,6 +253,12 @@ class RedirecionadorPagamentoOnlineTest {
     @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 14.29 mantendo arredondamento")
     void teste12() throws InterruptedException {
         var transacao = criaTransacao(14.29);
+
+        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
+                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), PEDIDO_ID);
+
+        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
 
         var respostaTransacao = redirecionador.processaPagamento(transacao);
 

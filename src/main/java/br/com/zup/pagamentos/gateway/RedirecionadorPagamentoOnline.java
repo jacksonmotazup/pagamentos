@@ -19,7 +19,7 @@ public class RedirecionadorPagamentoOnline {
         this.gateways = gateways;
     }
 
-    public RespostaTransacaoGateway processaPagamento(Transacao transacao) throws InterruptedException {
+    public RespostaTransacaoGateway processaPagamento(Transacao transacao) {
         var gatewaysPorOrdemMenorTaxa = this.encontraGatewayMenorTaxa(gateways, transacao.getValor());
 
         RespostaTransacaoGateway respostaTransacaoGateway = null;
@@ -35,7 +35,7 @@ public class RedirecionadorPagamentoOnline {
         return respostaTransacaoGateway;
     }
 
-    public List<GatewayPagamento> encontraGatewayMenorTaxa(Collection<GatewayPagamento> gateways, BigDecimal valor) {
+    private List<GatewayPagamento> encontraGatewayMenorTaxa(Collection<GatewayPagamento> gateways, BigDecimal valor) {
         return gateways.stream()
                 .sorted(Comparator.comparing(gateway -> gateway.calculaTaxa(valor)))
                 .toList();
