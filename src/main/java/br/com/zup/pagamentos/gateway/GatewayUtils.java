@@ -1,12 +1,8 @@
 package br.com.zup.pagamentos.gateway;
 
 import br.com.zup.pagamentos.compartilhado.exceptions.GatewayOfflineException;
-import br.com.zup.pagamentos.transacao.Transacao;
 
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.Random;
-import java.util.UUID;
 
 public class GatewayUtils {
 
@@ -19,18 +15,14 @@ public class GatewayUtils {
         }
     }
 
-    public void congelaThread(int de, int ate) throws InterruptedException {
+    public void congelaThread(int de, int ate) {
         var tempo = this.random.nextInt(de, ate);
-        Thread.sleep(tempo);
+
+        try {
+            Thread.sleep(tempo);
+        } catch (InterruptedException e) {
+            System.out.println("LOG: " + e.getMessage());
+        }
     }
 
-    public RespostaTransacaoGateway criaRespostaTransacao(Transacao transacao, GatewayPagamento gateway) {
-        var taxa = gateway.calculaTaxa(transacao.getValor());
-
-        return new RespostaTransacaoGateway(UUID.randomUUID(),
-                gateway,
-                taxa.setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(),
-                transacao.getPedidoId());
-    }
 }

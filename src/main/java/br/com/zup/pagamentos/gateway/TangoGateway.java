@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class TangoGateway implements GatewayPagamento {
@@ -17,13 +19,19 @@ public class TangoGateway implements GatewayPagamento {
     }
 
     @Override
-    public RespostaTransacaoGateway processaPagamento(Transacao transacao) throws InterruptedException {
+    public RespostaTransacaoGateway processaPagamento(Transacao transacao) {
         var gatewayUtils = new GatewayUtils();
         gatewayUtils.congelaThread(50, 100);
 
         gatewayUtils.simulaException(this.getClass().getSimpleName());
 
-        return gatewayUtils.criaRespostaTransacao(transacao, this);
+        var taxa = this.calculaTaxa(transacao.getValor());
+
+        return new RespostaTransacaoGateway(UUID.randomUUID(),
+                this,
+                taxa.setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(),
+                transacao.getPedidoId());
     }
 
 
