@@ -1,285 +1,147 @@
 package br.com.zup.pagamentos.gateway;
 
+import br.com.zup.pagamentos.compartilhado.exceptions.GatewayOfflineException;
+import br.com.zup.pagamentos.compartilhado.exceptions.SemGatewayDisponivelException;
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.transacao.Transacao;
 import br.com.zup.pagamentos.usuario.Usuario;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.validation.Validation;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static br.com.zup.pagamentos.formapagamento.FormaPagamento.CARTAO_CREDITO;
 import static br.com.zup.pagamentos.transacao.StatusTransacao.EM_PROCESSAMENTO;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static java.math.RoundingMode.HALF_UP;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * - Gateway Seya opera no brasil, aceita todas bandeiras, tem custo fixo de 6.00.
- * - Gateway Saori opera no brasil, só aceita visa e master, tem taxa percentual de 5% sobre a compra
- * - Gateway Tango opera na argentina, aceita todas as bandeiras e tem custo que varia entre fixo e variável.
- * Para compras de até 100 reais, o custo é fixo de 4.00. Para operações com valor maior que 100,
- * o custo vira de 6% do valor total.
- */
 
-@ExtendWith(MockitoExtension.class)
+
 class RedirecionadorPagamentoOnlineTest {
-    private final Long PEDIDO_ID = 123L;
-    SaoriGateway saori = new SaoriGateway();
-    SeyaGateway seya = new SeyaGateway();
-    TangoGateway tango = new TangoGateway();
+    private final BigDecimal MENOR_VALOR = BigDecimal.valueOf(0.01).setScale(2, HALF_UP);
+    private final BigDecimal VALOR_MEDIO = BigDecimal.valueOf(0.02).setScale(2, HALF_UP);
+    private final BigDecimal MAIOR_VALOR = BigDecimal.valueOf(0.03).setScale(2, HALF_UP);
 
-    @Mock
-    private RedirecionadorPagamentoOnline redirecionador;
+    private final SaoriGateway saori = mock(SaoriGateway.class);
+    private final SeyaGateway seya = mock(SeyaGateway.class);
+    private final TangoGateway tango = mock(TangoGateway.class);
+    private final RedirecionadorPagamentoOnline redirecionador = new RedirecionadorPagamentoOnline(List.of(saori,
+            seya, tango));
 
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.00 mantendo arredondamento")
-    void teste1() {
-        var transacao = criaTransacao(1.00);
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
-                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
+    @Nested
+    class testesProcessaPagamento {
 
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
+        @Test
+        @DisplayName("Deve redirecionar pro gateway de menor taxa, quando todos estiverem disponiveis")
+        void teste1() {
+            var transacao = criaTransacao();
+            var respostaGateway = criaRespostaGateway(saori, MENOR_VALOR);
 
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
+            when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
+            when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
+            when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+            when(saori.processaPagamento(transacao)).thenReturn(respostaGateway);
 
-        assertAll(
-                () -> assertEquals(valorBigDecimal(0.05), respostaTransacao.taxa()),
-                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
+            var respostaTransacaoGateway = redirecionador.processaPagamento(transacao);
+
+            assertAll(
+                    () -> assertEquals(respostaGateway.gateway().getClass(), respostaTransacaoGateway.gateway().getClass()),
+                    () -> assertEquals(MENOR_VALOR, respostaTransacaoGateway.taxa())
+            );
+        }
+
+        @Test
+        @DisplayName("Deve redirecionar pro segundo gateway de menor taxa, quando o primeiro estiver offline")
+        void teste2() {
+            var transacao = criaTransacao();
+            var respostaGateway = criaRespostaGateway(tango, VALOR_MEDIO);
+
+            when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
+            when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
+            when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+            when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(tango.processaPagamento(transacao)).thenReturn(respostaGateway);
+
+            var respostaTransacaoGateway = redirecionador.processaPagamento(transacao);
+
+            assertAll(
+                    () -> assertEquals(respostaGateway.gateway().getClass(), respostaTransacaoGateway.gateway().getClass()),
+                    () -> assertEquals(VALOR_MEDIO, respostaTransacaoGateway.taxa())
+            );
+        }
+
+        @Test
+        @DisplayName("Deve redirecionar pro terceiro gateway de menor taxa, quando o primeiro e segundo estiverem offline")
+        void teste3() {
+            var transacao = criaTransacao();
+            var respostaGateway = criaRespostaGateway(seya, MAIOR_VALOR);
+
+            when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
+            when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
+            when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+            when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(tango.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(seya.processaPagamento(transacao)).thenReturn(respostaGateway);
+
+            var respostaTransacaoGateway = redirecionador.processaPagamento(transacao);
+
+            assertAll(
+                    () -> assertEquals(respostaGateway.gateway().getClass(), respostaTransacaoGateway.gateway().getClass()),
+                    () -> assertEquals(MAIOR_VALOR, respostaTransacaoGateway.taxa())
+            );
+        }
+
+        @Test
+        @DisplayName("Deve lançar SemGatewayDisponivelException, quando todos os gateways estiverem offline")
+        void teste4() {
+            var transacao = criaTransacao();
+
+            when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
+            when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
+            when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+            when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(tango.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(seya.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+
+            var exception = assertThrows(SemGatewayDisponivelException.class,
+                    () -> redirecionador.processaPagamento(transacao));
+            assertEquals("Todos os gateways estão offline", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Não deve deixar instanciar novo RedirecionadorPagamentoOnline com uma lista de gateways vazia")
+        void teste5() {
+            var redirecionadorVazio = new RedirecionadorPagamentoOnline(List.of());
+
+            var factory = Validation.buildDefaultValidatorFactory();
+            var validator = factory.getValidator();
+
+            var validacao = validator.validate(redirecionadorVazio);
+
+            assertEquals(1, validacao.size());
+            assertEquals("não deve estar vazio", validacao.stream().findFirst().get().getMessage());
+        }
     }
 
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 1.35 mantendo arredondamento")
-    void teste2(){
-        var transacao = criaTransacao(1.35);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
-                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-
-        assertAll(
-                () -> assertEquals(valorBigDecimal(0.07), respostaTransacao.taxa()),
-                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 80.00")
-    void teste3() {
-        var transacao = criaTransacao(80.00);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
-                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-
-        assertAll(
-                () -> assertEquals(valorBigDecimal(4.00), respostaTransacao.taxa()),
-                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 81.00")
-    void teste4() {
-        var transacao = criaTransacao(81.00);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), tango,
-                tango.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-
-        assertAll(
-                () -> assertEquals(valorBigDecimal(4.00), respostaTransacao.taxa()),
-                () -> assertEquals(TangoGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 100.00")
-    void teste5() {
-        var transacao = criaTransacao(100.00);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), tango,
-                tango.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-
-        assertAll(
-                () -> assertEquals(valorBigDecimal(4.00), respostaTransacao.taxa()),
-                () -> assertEquals(TangoGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 101.00")
-    void teste6() {
-        var transacao = criaTransacao(101.00);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
-                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-
-        assertAll(
-                () -> assertEquals(valorBigDecimal(5.05), respostaTransacao.taxa()),
-                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 120.00")
-    void teste7() {
-        var transacao = criaTransacao(120.00);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
-                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-
-        assertAll(
-                () -> assertEquals(valorBigDecimal(6.00), respostaTransacao.taxa()),
-                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 121.00")
-    void teste8() {
-        var transacao = criaTransacao(121.00);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), seya,
-                seya.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-        assertAll(
-                () -> assertEquals(valorBigDecimal(6.00), respostaTransacao.taxa()),
-                () -> assertEquals(SeyaGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 200.00")
-    void teste9()  {
-        var transacao = criaTransacao(200.00);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), seya,
-                seya.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-        assertAll(
-                () -> assertEquals(valorBigDecimal(6.00), respostaTransacao.taxa()),
-                () -> assertEquals(SeyaGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa  com valor de pagamento 212.23")
-    void teste10() {
-        var transacao = criaTransacao(212.23);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), seya,
-                seya.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-        assertAll(
-                () -> assertEquals(valorBigDecimal(6.00), respostaTransacao.taxa()),
-                () -> assertEquals(SeyaGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 0.11 mantendo arredondamento")
-    void teste11() {
-        var transacao = criaTransacao(0.11);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
-                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-
-        assertAll(
-                () -> assertEquals(valorBigDecimal(0.01), respostaTransacao.taxa()),
-                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-    }
-
-    @Test
-    @DisplayName("Deve redirecionar pro gateway com menor taxa com valor de pagamento 14.29 mantendo arredondamento")
-    void teste12() throws InterruptedException {
-        var transacao = criaTransacao(14.29);
-
-        var respostaTransacaoGatewayMock = new RespostaTransacaoGateway(UUID.randomUUID(), saori,
-                saori.calculaTaxa(transacao.getValor()).setScale(2, RoundingMode.HALF_UP),
-                LocalDateTime.now(), PEDIDO_ID);
-
-        when(redirecionador.processaPagamento(transacao)).thenReturn(respostaTransacaoGatewayMock);
-
-        var respostaTransacao = redirecionador.processaPagamento(transacao);
-
-        assertAll(
-                () -> assertEquals(valorBigDecimal(0.71), respostaTransacao.taxa()),
-                () -> assertEquals(SaoriGateway.class.getSimpleName(), respostaTransacao.gateway().getClass().getSimpleName())
-        );
-    }
-
-
-    private Transacao criaTransacao(double valor) {
+    private Transacao criaTransacao() {
         return new Transacao(123L,
                 new Usuario("email@a.com", CARTAO_CREDITO),
                 new Restaurante("Restaurante", CARTAO_CREDITO),
-                BigDecimal.valueOf(valor),
+                BigDecimal.valueOf(1).setScale(2, HALF_UP),
                 CARTAO_CREDITO,
                 null,
                 EM_PROCESSAMENTO);
     }
 
-    private BigDecimal valorBigDecimal(double valor) {
-        return BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_EVEN);
+    private RespostaTransacaoGateway criaRespostaGateway(GatewayPagamento gatewayPagamento, BigDecimal taxa) {
+        return new RespostaTransacaoGateway(UUID.randomUUID(), gatewayPagamento, taxa,
+                LocalDateTime.now(), 123L);
     }
 }

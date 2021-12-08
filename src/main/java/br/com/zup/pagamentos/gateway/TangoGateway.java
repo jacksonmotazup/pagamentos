@@ -15,7 +15,7 @@ public class TangoGateway implements GatewayPagamento {
         if (valor.compareTo(BigDecimal.valueOf(100)) <= 0) {
             return BigDecimal.valueOf(4).setScale(2, RoundingMode.HALF_UP);
         }
-        return valor.multiply(BigDecimal.valueOf(0.06).setScale(2, RoundingMode.HALF_UP));
+        return valor.multiply(BigDecimal.valueOf(0.06)).setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
