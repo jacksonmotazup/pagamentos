@@ -5,22 +5,20 @@ import br.com.zup.pagamentos.compartilhado.exceptions.SemGatewayDisponivelExcept
 import br.com.zup.pagamentos.transacao.Transacao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.util.Assert;
 
-import javax.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
 @Service
-@Validated
 public class RedirecionadorPagamentoOnline {
-    @NotEmpty
     private final Collection<GatewayPagamento> gateways;
 
     @Autowired
-    public RedirecionadorPagamentoOnline(@NotEmpty Collection<GatewayPagamento> gateways) {
+    public RedirecionadorPagamentoOnline(Collection<GatewayPagamento> gateways) {
+        Assert.notEmpty(gateways, "Lista não pode estar vazia");
         this.gateways = gateways;
     }
 

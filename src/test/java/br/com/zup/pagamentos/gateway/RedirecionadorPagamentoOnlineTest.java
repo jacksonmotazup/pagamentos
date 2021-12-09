@@ -9,9 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.validation.Validation;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,18 +22,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
-
 class RedirecionadorPagamentoOnlineTest {
     private final BigDecimal MENOR_VALOR = BigDecimal.valueOf(0.01).setScale(2, HALF_UP);
     private final BigDecimal VALOR_MEDIO = BigDecimal.valueOf(0.02).setScale(2, HALF_UP);
     private final BigDecimal MAIOR_VALOR = BigDecimal.valueOf(0.03).setScale(2, HALF_UP);
 
-    private final SaoriGateway saori = mock(SaoriGateway.class);
-    private final SeyaGateway seya = mock(SeyaGateway.class);
-    private final TangoGateway tango = mock(TangoGateway.class);
-    private final RedirecionadorPagamentoOnline redirecionador = new RedirecionadorPagamentoOnline(List.of(saori,
-            seya, tango));
+    private final GatewayPagamento gatewayMenorValor = mock(GatewayPagamento.class);
+    private final GatewayPagamento gatewayMaiorValor = mock(GatewayPagamento.class);
+    private final GatewayPagamento gatewayValorMedio = mock(GatewayPagamento.class);
+    private final RedirecionadorPagamentoOnline redirecionador = new RedirecionadorPagamentoOnline(List.of(gatewayMenorValor,
+            gatewayMaiorValor, gatewayValorMedio));
 
     @Nested
     class testesProcessaPagamento {
@@ -42,10 +40,10 @@ class RedirecionadorPagamentoOnlineTest {
         @DisplayName("Deve redirecionar pro gateway de menor taxa, quando todos estiverem disponiveis")
         void teste1() {
             var transacao = criaTransacao();
-            var respostaGateway = criaRespostaGateway(saori, MENOR_VALOR);
+            var respostaGateway = criaRespostaGateway(gatewayMenorValor, MENOR_VALOR);
 
             mockGateways(transacao);
-            when(saori.processaPagamento(transacao)).thenReturn(respostaGateway);
+            when(gatewayMenorValor.processaPagamento(transacao)).thenReturn(respostaGateway);
 
             var respostaTransacaoGateway = redirecionador.processaPagamento(transacao);
 
@@ -59,11 +57,11 @@ class RedirecionadorPagamentoOnlineTest {
         @DisplayName("Deve redirecionar pro segundo gateway de menor taxa, quando o primeiro estiver offline")
         void teste2() {
             var transacao = criaTransacao();
-            var respostaGateway = criaRespostaGateway(tango, VALOR_MEDIO);
+            var respostaGateway = criaRespostaGateway(gatewayValorMedio, VALOR_MEDIO);
 
             mockGateways(transacao);
-            when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
-            when(tango.processaPagamento(transacao)).thenReturn(respostaGateway);
+            when(gatewayMenorValor.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(gatewayValorMedio.processaPagamento(transacao)).thenReturn(respostaGateway);
 
             var respostaTransacaoGateway = redirecionador.processaPagamento(transacao);
 
@@ -77,12 +75,12 @@ class RedirecionadorPagamentoOnlineTest {
         @DisplayName("Deve redirecionar pro terceiro gateway de menor taxa, quando o primeiro e segundo estiverem offline")
         void teste3() {
             var transacao = criaTransacao();
-            var respostaGateway = criaRespostaGateway(seya, MAIOR_VALOR);
+            var respostaGateway = criaRespostaGateway(gatewayMaiorValor, MAIOR_VALOR);
 
             mockGateways(transacao);
-            when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
-            when(tango.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
-            when(seya.processaPagamento(transacao)).thenReturn(respostaGateway);
+            when(gatewayMenorValor.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(gatewayValorMedio.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(gatewayMaiorValor.processaPagamento(transacao)).thenReturn(respostaGateway);
 
             var respostaTransacaoGateway = redirecionador.processaPagamento(transacao);
 
@@ -98,9 +96,9 @@ class RedirecionadorPagamentoOnlineTest {
             var transacao = criaTransacao();
 
             mockGateways(transacao);
-            when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
-            when(tango.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
-            when(seya.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(gatewayMenorValor.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(gatewayValorMedio.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
+            when(gatewayMaiorValor.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
 
             var exception = assertThrows(SemGatewayDisponivelException.class,
                     () -> redirecionador.processaPagamento(transacao));
@@ -110,22 +108,17 @@ class RedirecionadorPagamentoOnlineTest {
         @Test
         @DisplayName("Não deve deixar instanciar novo RedirecionadorPagamentoOnline com uma lista de gateways vazia")
         void teste5() {
-            var redirecionadorVazio = new RedirecionadorPagamentoOnline(List.of());
-
-            var factory = Validation.buildDefaultValidatorFactory();
-            var validator = factory.getValidator();
-
-            var validacao = validator.validate(redirecionadorVazio);
-
-            assertEquals(1, validacao.size());
-            assertEquals("não deve estar vazio", validacao.stream().findFirst().get().getMessage());
+            Collection<GatewayPagamento> listaVazia = List.of();
+            var ex = assertThrows(IllegalArgumentException.class,
+                    () -> new RedirecionadorPagamentoOnline(listaVazia));
+            assertEquals("Lista não pode estar vazia", ex.getMessage());
         }
     }
 
     private void mockGateways(Transacao transacao) {
-        when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
-        when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
-        when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+        when(gatewayMenorValor.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
+        when(gatewayValorMedio.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
+        when(gatewayMaiorValor.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
     }
 
     private Transacao criaTransacao() {
