@@ -44,9 +44,7 @@ class RedirecionadorPagamentoOnlineTest {
             var transacao = criaTransacao();
             var respostaGateway = criaRespostaGateway(saori, MENOR_VALOR);
 
-            when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
-            when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
-            when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+            mockGateways(transacao);
             when(saori.processaPagamento(transacao)).thenReturn(respostaGateway);
 
             var respostaTransacaoGateway = redirecionador.processaPagamento(transacao);
@@ -63,9 +61,7 @@ class RedirecionadorPagamentoOnlineTest {
             var transacao = criaTransacao();
             var respostaGateway = criaRespostaGateway(tango, VALOR_MEDIO);
 
-            when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
-            when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
-            when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+            mockGateways(transacao);
             when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(tango.processaPagamento(transacao)).thenReturn(respostaGateway);
 
@@ -83,9 +79,7 @@ class RedirecionadorPagamentoOnlineTest {
             var transacao = criaTransacao();
             var respostaGateway = criaRespostaGateway(seya, MAIOR_VALOR);
 
-            when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
-            when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
-            when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+            mockGateways(transacao);
             when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(tango.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(seya.processaPagamento(transacao)).thenReturn(respostaGateway);
@@ -103,9 +97,7 @@ class RedirecionadorPagamentoOnlineTest {
         void teste4() {
             var transacao = criaTransacao();
 
-            when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
-            when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
-            when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+            mockGateways(transacao);
             when(saori.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(tango.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(seya.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
@@ -128,6 +120,12 @@ class RedirecionadorPagamentoOnlineTest {
             assertEquals(1, validacao.size());
             assertEquals("não deve estar vazio", validacao.stream().findFirst().get().getMessage());
         }
+    }
+
+    private void mockGateways(Transacao transacao) {
+        when(saori.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
+        when(tango.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
+        when(seya.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
     }
 
     private Transacao criaTransacao() {
