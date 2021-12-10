@@ -31,7 +31,7 @@ public class Transacao {
     private Restaurante restaurante;
     private BigDecimal valor;
     @NotNull
-    private LocalDateTime dataCriacao = LocalDateTime.now();
+    private final LocalDateTime dataCriacao = LocalDateTime.now();
     @NotNull
     @Enumerated(STRING)
     private FormaPagamento formaPagamento;
@@ -86,6 +86,10 @@ public class Transacao {
 
     public String getInformacoes() {
         return informacoes;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
     }
 
     public void concluiTransacaoOffline() {
