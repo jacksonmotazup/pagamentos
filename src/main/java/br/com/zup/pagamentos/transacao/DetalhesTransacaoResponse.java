@@ -6,15 +6,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class DetalhesTransacaoResponse {
-    private final Long id;
-    private final Long pedidoId;
-    private final String emailUsuario;
-    private final String nomeRestaurante;
-    private final BigDecimal valor;
-    private final LocalDateTime dataCriacao;
-    private final FormaPagamento formaPagamento;
-    private final String informacoes;
-    private final StatusTransacao status;
+    private Long id;
+    private Long pedidoId;
+    private String emailUsuario;
+    private String nomeRestaurante;
+    private BigDecimal valor;
+    private LocalDateTime dataCriacao;
+    private FormaPagamento formaPagamento;
+    private String informacoes;
+    private StatusTransacao status;
 
     public DetalhesTransacaoResponse(Transacao transacao) {
         this.id = transacao.getId();
@@ -26,6 +26,9 @@ public class DetalhesTransacaoResponse {
         this.formaPagamento = transacao.getFormaPagamento();
         this.informacoes = transacao.getInformacoes();
         status = transacao.getStatus();
+    }
+
+    public DetalhesTransacaoResponse() {
     }
 
     public Long getId() {
