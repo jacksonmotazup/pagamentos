@@ -1,6 +1,6 @@
 package br.com.zup.pagamentos.pagamento.online;
 
-import br.com.zup.pagamentos.gateway.RedirecionadorGateways;
+import br.com.zup.pagamentos.gateway.RedirecionadorPagamentoOnline;
 import br.com.zup.pagamentos.pagamento.PedidoMock;
 import br.com.zup.pagamentos.transacao.TransacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,11 @@ import javax.transaction.Transactional;
 public class ProcessadorPagamentoOnline {
 
     private final TransacaoRepository transacaoRepository;
-    private final RedirecionadorGateways gateway;
+    private final RedirecionadorPagamentoOnline gateway;
 
     @Autowired
-    public ProcessadorPagamentoOnline(TransacaoRepository transacaoRepository, RedirecionadorGateways gateway) {
+    public ProcessadorPagamentoOnline(TransacaoRepository transacaoRepository,
+                                      RedirecionadorPagamentoOnline gateway) {
         this.transacaoRepository = transacaoRepository;
         this.gateway = gateway;
     }
