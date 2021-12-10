@@ -5,6 +5,7 @@ import br.com.zup.pagamentos.compartilhado.exceptions.SemGatewayDisponivelExcept
 import br.com.zup.pagamentos.restaurante.Restaurante;
 import br.com.zup.pagamentos.transacao.Transacao;
 import br.com.zup.pagamentos.usuario.Usuario;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,16 +34,23 @@ class RedirecionadorPagamentoOnlineTest {
     private final RedirecionadorPagamentoOnline redirecionador = new RedirecionadorPagamentoOnline(List.of(gatewayMenorValor,
             gatewayMaiorValor, gatewayValorMedio));
 
+    Transacao transacao = criaTransacao();
+
     @Nested
     class testesProcessaPagamento {
+
+        @BeforeEach
+        void setUp() {
+            when(gatewayMenorValor.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
+            when(gatewayValorMedio.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
+            when(gatewayMaiorValor.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
+        }
 
         @Test
         @DisplayName("Deve redirecionar pro gateway de menor taxa, quando todos estiverem disponiveis")
         void teste1() {
-            var transacao = criaTransacao();
             var respostaGateway = criaRespostaGateway(gatewayMenorValor, MENOR_VALOR);
 
-            mockGateways(transacao);
             when(gatewayMenorValor.processaPagamento(transacao)).thenReturn(respostaGateway);
 
             var respostaTransacaoGateway = redirecionador.processaPagamento(transacao);
@@ -56,10 +64,8 @@ class RedirecionadorPagamentoOnlineTest {
         @Test
         @DisplayName("Deve redirecionar pro segundo gateway de menor taxa, quando o primeiro estiver offline")
         void teste2() {
-            var transacao = criaTransacao();
             var respostaGateway = criaRespostaGateway(gatewayValorMedio, VALOR_MEDIO);
 
-            mockGateways(transacao);
             when(gatewayMenorValor.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(gatewayValorMedio.processaPagamento(transacao)).thenReturn(respostaGateway);
 
@@ -74,10 +80,8 @@ class RedirecionadorPagamentoOnlineTest {
         @Test
         @DisplayName("Deve redirecionar pro terceiro gateway de menor taxa, quando o primeiro e segundo estiverem offline")
         void teste3() {
-            var transacao = criaTransacao();
             var respostaGateway = criaRespostaGateway(gatewayMaiorValor, MAIOR_VALOR);
 
-            mockGateways(transacao);
             when(gatewayMenorValor.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(gatewayValorMedio.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(gatewayMaiorValor.processaPagamento(transacao)).thenReturn(respostaGateway);
@@ -93,9 +97,6 @@ class RedirecionadorPagamentoOnlineTest {
         @Test
         @DisplayName("Deve lançar SemGatewayDisponivelException, quando todos os gateways estiverem offline")
         void teste4() {
-            var transacao = criaTransacao();
-
-            mockGateways(transacao);
             when(gatewayMenorValor.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(gatewayValorMedio.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
             when(gatewayMaiorValor.processaPagamento(transacao)).thenThrow(GatewayOfflineException.class);
@@ -115,11 +116,6 @@ class RedirecionadorPagamentoOnlineTest {
         }
     }
 
-    private void mockGateways(Transacao transacao) {
-        when(gatewayMenorValor.calculaTaxa(transacao.getValor())).thenReturn(MENOR_VALOR);
-        when(gatewayValorMedio.calculaTaxa(transacao.getValor())).thenReturn(VALOR_MEDIO);
-        when(gatewayMaiorValor.calculaTaxa(transacao.getValor())).thenReturn(MAIOR_VALOR);
-    }
 
     private Transacao criaTransacao() {
         return new Transacao(123L,
